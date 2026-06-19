@@ -1,0 +1,548 @@
+window.MOCK_DATA = {
+  "dashboard": {
+    "stats": {
+      "totalInfrastructures": 3842,
+      "critical": 47,
+      "projectsInProgress": 23,
+      "riskZones": 8
+    },
+    "evolution": [
+      {
+        "month": "Jan",
+        "value": 3200
+      },
+      {
+        "month": "Fév",
+        "value": 3350
+      },
+      {
+        "month": "Mar",
+        "value": 3480
+      },
+      {
+        "month": "Avr",
+        "value": 3590
+      },
+      {
+        "month": "Mai",
+        "value": 3720
+      },
+      {
+        "month": "Juin",
+        "value": 3842
+      }
+    ],
+    "bySector": [
+      {
+        "name": "Routes",
+        "count": 890,
+        "color": "bg-blue-500"
+      },
+      {
+        "name": "Eau",
+        "count": 620,
+        "color": "bg-cyan-500"
+      },
+      {
+        "name": "Énergie",
+        "count": 540,
+        "color": "bg-amber-500"
+      },
+      {
+        "name": "Santé",
+        "count": 310,
+        "color": "bg-rose-500"
+      },
+      {
+        "name": "Éducation",
+        "count": 480,
+        "color": "bg-violet-500"
+      },
+      {
+        "name": "Autres",
+        "count": 1002,
+        "color": "bg-slate-400"
+      }
+    ],
+    "recentActivities": [
+      {
+        "time": "Il y a 12 min",
+        "text": "Inspection terminée — Pont Kasa-Vubu",
+        "type": "info"
+      },
+      {
+        "time": "Il y a 45 min",
+        "text": "Nouveau rapport SIG — Zone Gombe",
+        "type": "success"
+      },
+      {
+        "time": "Il y a 2 h",
+        "text": "Alerte résolue — Fuite réseau eau Secteur 4",
+        "type": "warning"
+      },
+      {
+        "time": "Il y a 5 h",
+        "text": "Projet rénovation école validé — Budget approuvé",
+        "type": "info"
+      }
+    ],
+    "priorityAlerts": [
+      {
+        "level": "critical",
+        "title": "Panne réseau électrique",
+        "zone": "Secteur 4 — Limete"
+      },
+      {
+        "level": "high",
+        "title": "Risque d'inondation",
+        "zone": "Zone Nord-Est"
+      },
+      {
+        "level": "medium",
+        "title": "Dégradation chaussée",
+        "zone": "Axe Boulevard du 30 Juin"
+      }
+    ]
+  },
+  "infrastructures": [
+    {
+      "id": 1,
+      "nom": "Boulevard du 30 Juin",
+      "categorie": "Routes et voiries",
+      "etat": "Dégradé",
+      "zone": "Gombe",
+      "degradation": 42,
+      "pannes": 3,
+      "maintenance": 125000
+    },
+    {
+      "id": 2,
+      "nom": "Pont Kasa-Vubu",
+      "categorie": "Ponts",
+      "etat": "Bon",
+      "zone": "Kasa-Vubu",
+      "degradation": 18,
+      "pannes": 0,
+      "maintenance": 45000
+    },
+    {
+      "id": 3,
+      "nom": "Station pompage Lingwala",
+      "categorie": "Réseaux d'eau potable",
+      "etat": "Critique",
+      "zone": "Lingwala",
+      "degradation": 78,
+      "pannes": 5,
+      "maintenance": 210000
+    },
+    {
+      "id": 4,
+      "nom": "Poste source Matete",
+      "categorie": "Réseaux électriques",
+      "etat": "Moyen",
+      "zone": "Matete",
+      "degradation": 55,
+      "pannes": 2,
+      "maintenance": 180000
+    },
+    {
+      "id": 5,
+      "nom": "École Primaire Bandal",
+      "categorie": "Écoles",
+      "etat": "Bon",
+      "zone": "Bandal",
+      "degradation": 22,
+      "pannes": 1,
+      "maintenance": 32000
+    },
+    {
+      "id": 6,
+      "nom": "Hôpital Général",
+      "categorie": "Hôpitaux",
+      "etat": "Moyen",
+      "zone": "Gombe",
+      "degradation": 48,
+      "pannes": 2,
+      "maintenance": 95000
+    },
+    {
+      "id": 7,
+      "nom": "Marché Central",
+      "categorie": "Marchés",
+      "etat": "Dégradé",
+      "zone": "Gombe",
+      "degradation": 61,
+      "pannes": 4,
+      "maintenance": 67000
+    },
+    {
+      "id": 8,
+      "nom": "Mairie de la Commune",
+      "categorie": "Bâtiments administratifs",
+      "etat": "Bon",
+      "zone": "Limete",
+      "degradation": 15,
+      "pannes": 0,
+      "maintenance": 28000
+    }
+  ],
+  "categories": [
+    "Routes et voiries",
+    "Ponts",
+    "Réseaux d'eau potable",
+    "Réseaux électriques",
+    "Écoles",
+    "Hôpitaux",
+    "Marchés",
+    "Bâtiments administratifs",
+    "Espaces verts",
+    "Installations sportives"
+  ],
+  "mapZones": [
+    {
+      "name": "Bandalungwa",
+      "x": 25,
+      "y": 68,
+      "risk": "medium",
+      "infra": 142
+    },
+    {
+      "name": "Barumbu",
+      "x": 52,
+      "y": 28,
+      "risk": "medium",
+      "infra": 98
+    },
+    {
+      "name": "Bumbu",
+      "x": 38,
+      "y": 62,
+      "risk": "high",
+      "infra": 165
+    },
+    {
+      "name": "Gombe",
+      "x": 48,
+      "y": 32,
+      "risk": "low",
+      "infra": 420
+    },
+    {
+      "name": "Haute-Ntoto",
+      "x": 55,
+      "y": 22,
+      "risk": "low",
+      "infra": 76
+    },
+    {
+      "name": "Kalamu",
+      "x": 42,
+      "y": 58,
+      "risk": "medium",
+      "infra": 188
+    },
+    {
+      "name": "Kasa-Vubu",
+      "x": 35,
+      "y": 72,
+      "risk": "medium",
+      "infra": 240
+    },
+    {
+      "name": "Kimbanseke",
+      "x": 82,
+      "y": 62,
+      "risk": "high",
+      "infra": 210
+    },
+    {
+      "name": "Kinshasa",
+      "x": 58,
+      "y": 38,
+      "risk": "medium",
+      "infra": 134
+    },
+    {
+      "name": "Kintambo",
+      "x": 32,
+      "y": 42,
+      "risk": "low",
+      "infra": 156
+    },
+    {
+      "name": "Kisenso",
+      "x": 48,
+      "y": 78,
+      "risk": "high",
+      "infra": 198
+    },
+    {
+      "name": "Lemba",
+      "x": 55,
+      "y": 68,
+      "risk": "medium",
+      "infra": 172
+    },
+    {
+      "name": "Limete",
+      "x": 68,
+      "y": 42,
+      "risk": "high",
+      "infra": 310
+    },
+    {
+      "name": "Lingwala",
+      "x": 58,
+      "y": 30,
+      "risk": "high",
+      "infra": 195
+    },
+    {
+      "name": "Makala",
+      "x": 38,
+      "y": 48,
+      "risk": "medium",
+      "infra": 148
+    },
+    {
+      "name": "Maluku",
+      "x": 88,
+      "y": 48,
+      "risk": "low",
+      "infra": 89
+    },
+    {
+      "name": "Masina",
+      "x": 78,
+      "y": 55,
+      "risk": "high",
+      "infra": 265
+    },
+    {
+      "name": "Matete",
+      "x": 72,
+      "y": 65,
+      "risk": "medium",
+      "infra": 280
+    },
+    {
+      "name": "N'djili",
+      "x": 85,
+      "y": 38,
+      "risk": "high",
+      "infra": 224
+    },
+    {
+      "name": "Ngaba",
+      "x": 62,
+      "y": 72,
+      "risk": "medium",
+      "infra": 131
+    },
+    {
+      "name": "Ngaliema",
+      "x": 22,
+      "y": 35,
+      "risk": "low",
+      "infra": 178
+    },
+    {
+      "name": "Ngiri-Ngiri",
+      "x": 45,
+      "y": 75,
+      "risk": "high",
+      "infra": 152
+    },
+    {
+      "name": "Mont-Ngafula",
+      "x": 18,
+      "y": 55,
+      "risk": "low",
+      "infra": 167
+    },
+    {
+      "name": "Selembao",
+      "x": 28,
+      "y": 82,
+      "risk": "medium",
+      "infra": 143
+    }
+  ],
+  "planning": {
+    "residential": 38,
+    "commercial": 22,
+    "industrial": 15,
+    "populationDensity": 12400,
+    "availableLand": 340,
+    "neighborhoodEvolution": [
+      {
+        "quartier": "Gombe",
+        "growth": 12
+      },
+      {
+        "quartier": "Limete",
+        "growth": 8
+      },
+      {
+        "quartier": "Matete",
+        "growth": 15
+      },
+      {
+        "quartier": "Bandal",
+        "growth": 6
+      }
+    ]
+  },
+  "mobility": {
+    "trafficIndex": 72,
+    "roadCondition": 68,
+    "avgTravelTime": 34,
+    "congestionHotspots": [
+      "Rond-point Victoire",
+      "Axe Kasa-Vubu",
+      "Pont Matadi"
+    ],
+    "accessibility": 74
+  },
+  "environment": {
+    "wasteManagement": 65,
+    "airPollution": 58,
+    "noisePollution": 62,
+    "wastewater": 71,
+    "floodRisk": 45,
+    "greenSpaces": 82
+  },
+  "socioeco": {
+    "commerce": 2400,
+    "urbanAgriculture": 180,
+    "crafts": 920,
+    "industry": 340,
+    "services": 1560,
+    "health": 89,
+    "education": 156,
+    "employment": 67,
+    "avgIncome": 285
+  },
+  "projects": [
+    {
+      "id": 1,
+      "title": "Rénovation réseau eau Secteur 4",
+      "status": "todo",
+      "priority": "Haute",
+      "budget": 450000,
+      "progress": 15
+    },
+    {
+      "id": 2,
+      "title": "Réfection pont Kasa-Vubu",
+      "status": "inprogress",
+      "priority": "Critique",
+      "budget": 1200000,
+      "progress": 45
+    },
+    {
+      "id": 3,
+      "title": "Éclairage public Matete",
+      "status": "inprogress",
+      "priority": "Moyenne",
+      "budget": 320000,
+      "progress": 70
+    },
+    {
+      "id": 4,
+      "title": "Extension école Bandal",
+      "status": "review",
+      "priority": "Moyenne",
+      "budget": 890000,
+      "progress": 90
+    },
+    {
+      "id": 5,
+      "title": "Drainage zone Nord-Est",
+      "status": "done",
+      "priority": "Haute",
+      "budget": 560000,
+      "progress": 100
+    }
+  ],
+  "reports": [
+    {
+      "month": "Juin 2026",
+      "type": "Mensuel",
+      "status": "Disponible"
+    },
+    {
+      "month": "Mai 2026",
+      "type": "Mensuel",
+      "status": "Disponible"
+    },
+    {
+      "month": "Avr 2026",
+      "type": "Trimestriel",
+      "status": "Disponible"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "title": "Alerte critique — Réseau électrique",
+      "time": "Il y a 30 min",
+      "read": false
+    },
+    {
+      "id": 2,
+      "title": "Rapport mensuel disponible",
+      "time": "Il y a 2 h",
+      "read": false
+    },
+    {
+      "id": 3,
+      "title": "Projet validé — Pont Kasa-Vubu",
+      "time": "Hier",
+      "read": true
+    },
+    {
+      "id": 4,
+      "title": "Nouvelle donnée SIG importée",
+      "time": "Hier",
+      "read": true
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "nom": "Jean Mbala",
+      "email": "admin@projet.cd",
+      "role": "Administrateur",
+      "avatar": "JM"
+    },
+    {
+      "id": 2,
+      "nom": "Sarah Ilunga",
+      "email": "sarah@projet.cd",
+      "role": "Responsable Infrastructures",
+      "avatar": "SI"
+    },
+    {
+      "id": 3,
+      "nom": "Patrick Kabasele",
+      "email": "patrick@projet.cd",
+      "role": "Analyste SIG",
+      "avatar": "PK"
+    },
+    {
+      "id": 4,
+      "nom": "Grâce Mbuyi",
+      "email": "grace@projet.cd",
+      "role": "Responsable Environnement",
+      "avatar": "GM"
+    },
+    {
+      "id": 5,
+      "nom": "David Tshibangu",
+      "email": "david@projet.cd",
+      "role": "Chef de Projet",
+      "avatar": "DT"
+    }
+  ]
+};

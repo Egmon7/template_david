@@ -1,0 +1,20 @@
+[
+  {
+    "nom": "Parc urbain Bandal",
+    "categorie": "Espaces verts",
+    "etat": "Bon",
+    "zone": "Bandalungwa",
+    "degradation": 12,
+    "pannes": 0,
+    "maintenance": 18000
+  },
+  {
+    "nom": "Centre santé Matete",
+    "categorie": "Hôpitaux",
+    "etat": "Moyen",
+    "zone": "Matete",
+    "degradation": 38,
+    "pannes": 1,
+    "maintenance": 72000
+  }
+]

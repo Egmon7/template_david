@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — PROJET</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } },
+    };
+  </script>
+  <style>body { font-family: 'Inter', system-ui, sans-serif; }</style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+  <header class="mx-auto max-w-6xl px-6 pt-6">
+    <nav class="flex items-center justify-between">
+      <a href="index.html" class="text-lg font-semibold tracking-tight">PROJET</a>
+      <a href="index.html" class="text-sm font-medium text-slate-500 transition hover:text-slate-900">&larr; Retour à l'accueil</a>
+    </nav>
+  </header>
+
+  <main class="mx-auto flex min-h-[calc(100vh-80px)] max-w-md flex-col items-center justify-center px-6 py-16">
+    <div class="w-full text-center">
+      <h1 class="text-3xl font-bold tracking-tight">Connexion</h1>
+      <p class="mt-2 text-sm text-slate-500">Accédez à votre espace de gestion urbaine</p>
+    </div>
+
+    <form id="login-form" class="mt-10 w-full space-y-5">
+      <div>
+        <label for="email" class="block text-sm font-medium text-slate-700">Adresse e-mail</label>
+        <input type="email" id="email" name="email" value="admin@projet.cd" required
+          class="mt-1.5 w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+          placeholder="admin@projet.cd">
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-medium text-slate-700">Mot de passe</label>
+        <input type="password" id="password" name="password" value="demo" required
+          class="mt-1.5 w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+          placeholder="••••••••">
+      </div>
+      <button type="submit" class="w-full rounded-lg bg-black py-3 text-sm font-medium text-white transition hover:bg-slate-800">
+        Se connecter
+      </button>
+    </form>
+
+    <div class="mt-8 w-full rounded-xl border border-slate-100 bg-slate-50 p-4 text-left">
+      <p class="text-xs font-medium text-slate-600">Comptes de démonstration</p>
+      <ul class="mt-2 space-y-1 text-xs text-slate-500">
+        <li><button type="button" class="demo-account hover:text-black" data-email="admin@projet.cd">admin@projet.cd</button> — Jean Mbala (Administrateur)</li>
+        <li><button type="button" class="demo-account hover:text-black" data-email="sarah@projet.cd">sarah@projet.cd</button> — Sarah Ilunga</li>
+        <li><button type="button" class="demo-account hover:text-black" data-email="patrick@projet.cd">patrick@projet.cd</button> — Patrick Kabasele</li>
+        <li><button type="button" class="demo-account hover:text-black" data-email="grace@projet.cd">grace@projet.cd</button> — Grâce Mbuyi</li>
+        <li><button type="button" class="demo-account hover:text-black" data-email="david@projet.cd">david@projet.cd</button> — David Tshibangu</li>
+      </ul>
+      <p class="mt-2 text-[11px] text-slate-400">Mot de passe libre — tout identifiant fonctionne.</p>
+    </div>
+  </main>
+
+  <script src="js/permissions.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    if (getSession()) window.location.href = 'pages/' + getDefaultPageFile();
+
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      login(email, password);
+      window.location.href = 'pages/' + getDefaultPageFile();
+    });
+
+    document.querySelectorAll('.demo-account').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('email').value = btn.dataset.email;
+        document.getElementById('password').focus();
+      });
+    });
+  </script>
+</body>
+</html>

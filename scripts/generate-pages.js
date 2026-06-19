@@ -1,0 +1,56 @@
+const fs = require('fs');
+const path = require('path');
+
+const dir = path.join(__dirname, '..', 'pages');
+fs.mkdirSync(dir, { recursive: true });
+
+const head = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROJET</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']}}}};</script>
+  <style>html,body{height:100%;overflow-x:hidden}body{font-family:Inter,system-ui,sans-serif}.nav-active{background:rgb(241 245 249);color:rgb(15 23 42);font-weight:500}.dark .nav-active{background:rgb(30 41 59);color:white}@media(min-width:1024px){html,body{height:auto;overflow-x:hidden;overflow-y:auto}}</style>
+</head>
+<body>
+`;
+
+const scripts = `
+  <script src="../js/mock-data.js"></script>
+  <script src="../js/permissions.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/import.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/renders.js"></script>
+  <script src="../js/interactions.js"></script>
+`;
+
+const pages = [
+  ['dashboard.html', 'Tableau de bord', 'renderDashboard', null],
+  ['infrastructures.html', 'Gestion des infrastructures', 'renderInfrastructures', 'bindImportHandlers(() => location.reload())'],
+  ['planification.html', 'Planification urbaine', 'renderPlanning', null],
+  ['cartographie.html', 'Cartographie et SIG', 'renderMap', null],
+  ['mobilite.html', 'Mobilité et transport', 'renderMobility', null],
+  ['environnement.html', 'Environnement', 'renderEnvironment', null],
+  ['socio-economique.html', 'Activités socio-économiques', 'renderSocioeco', null],
+  ['projets.html', 'Gestion des projets', 'renderProjects', null],
+  ['rapports.html', 'Rapports et statistiques', 'renderReports', null],
+  ['notifications.html', 'Notifications', 'renderNotifications', null],
+  ['utilisateurs.html', 'Utilisateurs et rôles', 'renderUsers', null],
+  ['parametres.html', 'Paramètres', 'renderSettings', 'bindImportHandlers(() => { window.location.href = \"infrastructures.html\"; })'],
+];
+
+pages.forEach(([file, title, render, after]) => {
+  const afterPart = after ? `, () => { ${after} }` : '';
+  const init = `<script>initPage('${file}', '${title}', ${render}${afterPart});</script>`;
+  const html = head + scripts + init + '\n</body>\n</html>\n';
+  fs.writeFileSync(path.join(dir, file), html);
+  console.log('Created', file);
+});
