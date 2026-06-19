@@ -1,3 +1,6 @@
+const APP_NAME = 'B.E.A.U';
+const APP_TAGLINE = "Bureau d'études d'aménagement et d'urbanisme";
+
 const PAGES = [
   { id: 'dashboard', file: 'dashboard.html', label: 'Tableau de bord', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
   { id: 'infrastructures', file: 'infrastructures.html', label: 'Gestion des infrastructures', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
@@ -103,7 +106,10 @@ function getShell(activeFile, session) {
     <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/50 lg:hidden" aria-hidden="true"></div>
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex h-full w-[min(18rem,88vw)] -translate-x-full flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:max-h-screen lg:w-64 lg:shrink-0 lg:translate-x-0 lg:shadow-none dark:border-slate-800 dark:bg-slate-900">
       <div class="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
-        <a href="../index.html" class="text-base font-semibold tracking-tight">PROJET</a>
+        <a href="../index.html" class="block leading-tight">
+          <span class="text-base font-semibold tracking-tight">${APP_NAME}</span>
+          <span class="mt-0.5 block text-[10px] font-normal text-slate-400">${APP_TAGLINE}</span>
+        </a>
         <button type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" onclick="toggleSidebar(false)" aria-label="Fermer le menu">
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -191,7 +197,7 @@ async function initPage(activeFile, pageTitle, renderContent, afterRender) {
   if (!requirePageAccess(activeFile)) return;
 
   const session = getSession();
-  document.title = pageTitle + ' — PROJET';
+  document.title = pageTitle + ' — ' + APP_NAME;
   document.body.innerHTML = getShell(activeFile, session);
   document.body.className = 'h-[100dvh] overflow-hidden bg-slate-50 text-slate-900 antialiased lg:h-auto lg:overflow-visible dark:bg-slate-950 dark:text-slate-100';
 

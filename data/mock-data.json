@@ -113,7 +113,12 @@
       "zone": "Gombe",
       "degradation": 42,
       "pannes": 3,
-      "maintenance": 125000
+      "maintenance": 125000,
+      "reference": "KIN-GOM-0001",
+      "responsable": "Ing. Mukendi T.",
+      "dateInspection": "2026-04-12",
+      "longueur_km": 4.2,
+      "observations": "Nids-de-poule signalés secteur nord — revêtement à refaire sur 800 m"
     },
     {
       "id": 2,
@@ -123,7 +128,12 @@
       "zone": "Kasa-Vubu",
       "degradation": 18,
       "pannes": 0,
-      "maintenance": 45000
+      "maintenance": 45000,
+      "reference": "KIN-KAS-0002",
+      "responsable": "M. Tshibangu D.",
+      "dateInspection": "2026-05-02",
+      "portee_m": 320,
+      "observations": "Structure saine — inspection annuelle conforme"
     },
     {
       "id": 3,
@@ -133,7 +143,12 @@
       "zone": "Lingwala",
       "degradation": 78,
       "pannes": 5,
-      "maintenance": 210000
+      "maintenance": 210000,
+      "reference": "KIN-LIN-0003",
+      "responsable": "Ing. Kabila M.",
+      "dateInspection": "2026-03-28",
+      "debit_m3j": 12500,
+      "observations": "Pompe principale en surchauffe — intervention urgente planifiée"
     },
     {
       "id": 4,
@@ -143,27 +158,42 @@
       "zone": "Matete",
       "degradation": 55,
       "pannes": 2,
-      "maintenance": 180000
+      "maintenance": 180000,
+      "reference": "KIN-MAT-0004",
+      "responsable": "Ing. Mbuyi G.",
+      "dateInspection": "2026-04-18",
+      "puissance_kva": 2500,
+      "observations": "Transformateur sous charge — renforcement prévu T3 2026"
     },
     {
       "id": 5,
       "nom": "École Primaire Bandal",
       "categorie": "Écoles",
       "etat": "Bon",
-      "zone": "Bandal",
+      "zone": "Bandalungwa",
       "degradation": 22,
       "pannes": 1,
-      "maintenance": 32000
+      "maintenance": 32000,
+      "reference": "KIN-BAN-0005",
+      "responsable": "Ing. Ngoy P.",
+      "dateInspection": "2026-05-10",
+      "eleves": 840,
+      "observations": "Effectif en hausse — extension de 2 salles envisagée"
     },
     {
       "id": 6,
-      "nom": "Hôpital Général",
+      "nom": "Hôpital Général de Kinshasa",
       "categorie": "Hôpitaux",
       "etat": "Moyen",
       "zone": "Gombe",
       "degradation": 48,
       "pannes": 2,
-      "maintenance": 95000
+      "maintenance": 95000,
+      "reference": "KIN-GOM-0006",
+      "responsable": "Ing. Mukendi T.",
+      "dateInspection": "2026-04-05",
+      "lits": 320,
+      "observations": "Bloc opératoire opérationnel — besoin personnel infirmier supplémentaire"
     },
     {
       "id": 7,
@@ -173,7 +203,12 @@
       "zone": "Gombe",
       "degradation": 61,
       "pannes": 4,
-      "maintenance": 67000
+      "maintenance": 67000,
+      "reference": "KIN-GOM-0007",
+      "responsable": "Ing. Mukendi T.",
+      "dateInspection": "2026-03-15",
+      "emplacements": 450,
+      "observations": "Toitures partiellement dégradées — drainage insuffisant allée est"
     },
     {
       "id": 8,
@@ -183,7 +218,72 @@
       "zone": "Limete",
       "degradation": 15,
       "pannes": 0,
-      "maintenance": 28000
+      "maintenance": 28000,
+      "reference": "KIN-LIM-0008",
+      "responsable": "Mme Ilunga S.",
+      "dateInspection": "2026-05-20",
+      "surface_m2": 2400,
+      "observations": "Bâtiment rénové en 2024 — état général satisfaisant"
+    },
+    {
+      "id": 9,
+      "nom": "Stade Tata Raphaël",
+      "categorie": "Installations sportives",
+      "etat": "Moyen",
+      "zone": "Lemba",
+      "degradation": 38,
+      "pannes": 1,
+      "maintenance": 52000,
+      "reference": "KIN-LEM-0009",
+      "responsable": "Mme Kabasele A.",
+      "dateInspection": "2026-04-22",
+      "capacite": 50000,
+      "observations": "Pelouse à réfectionner — éclairage nocturne partiellement défaillant"
+    },
+    {
+      "id": 10,
+      "nom": "Parc urbain Ngaliema",
+      "categorie": "Espaces verts",
+      "etat": "Bon",
+      "zone": "Ngaliema",
+      "degradation": 20,
+      "pannes": 0,
+      "maintenance": 18000,
+      "reference": "KIN-NGA-0010",
+      "responsable": "Agent terrain — Ngaliema",
+      "dateInspection": "2026-05-08",
+      "surface_ha": 12.5,
+      "observations": "Arrosage automatique fonctionnel — nouvelles plantations secteur sud"
+    },
+    {
+      "id": 11,
+      "nom": "Axe Boulevard Lumumba",
+      "categorie": "Routes et voiries",
+      "etat": "Critique",
+      "zone": "Masina",
+      "degradation": 72,
+      "pannes": 4,
+      "maintenance": 198000,
+      "reference": "KIN-MAS-0011",
+      "responsable": "Ing. Kalonji R.",
+      "dateInspection": "2026-03-10",
+      "longueur_km": 6.8,
+      "observations": "Trafic lourd — chaussée effondrée sur 1,2 km — priorité absolue"
+    },
+    {
+      "id": 12,
+      "nom": "Centre de santé Kisenso",
+      "categorie": "Hôpitaux",
+      "etat": "Dégradé",
+      "zone": "Kisenso",
+      "degradation": 58,
+      "pannes": 2,
+      "maintenance": 74000,
+      "reference": "KIN-KIS-0012",
+      "responsable": "Agent terrain — Kisenso",
+      "dateInspection": "2026-04-30",
+      "lits": 48,
+      "observations": "Stock médicaments à renforcer — ambulance disponible 24h/24"
     }
   ],
   "categories": [

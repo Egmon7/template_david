@@ -103,7 +103,7 @@ function bindInfraFilters() {
       if (ok) visible++;
     });
     const empty = document.getElementById('infra-empty');
-    const tableWrap = table.closest('.overflow-x-auto');
+    const tableWrap = document.getElementById('infra-table-wrap');
     if (empty) empty.classList.toggle('hidden', visible > 0);
     if (tableWrap) tableWrap.classList.toggle('hidden', visible === 0);
     if (countEl) countEl.textContent = `${visible} résultat${visible > 1 ? 's' : ''}`;

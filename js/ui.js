@@ -167,17 +167,17 @@ function trafficLight(value, label) {
   </div>`;
 }
 
-function envIndicatorCard(icon, label, value, tone) {
+function envIndicatorCard(icon, label, value, tone, imported = false) {
   const tones = {
     good: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30',
     warn: 'text-amber-600 bg-amber-50 dark:bg-amber-950/30',
     bad: 'text-red-600 bg-red-50 dark:bg-red-950/30',
   };
-  return `<div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+  return `<div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 ${imported ? 'ring-1 ring-emerald-200 dark:ring-emerald-900' : ''}">
     <div class="flex items-center gap-3">
       <span class="flex h-10 w-10 items-center justify-center rounded-lg text-lg ${tones[tone]}">${icon}</span>
       <div class="min-w-0 flex-1">
-        <p class="text-xs text-slate-500">${label}</p>
+        <p class="text-xs text-slate-500">${label}${imported ? ' <span class="text-[9px] text-emerald-600">· import</span>' : ''}</p>
         <p class="text-xl font-semibold">${value}%</p>
       </div>
     </div>
@@ -187,11 +187,12 @@ function envIndicatorCard(icon, label, value, tone) {
   </div>`;
 }
 
-function socioActivityCard(icon, label, value) {
-  return `<div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+function socioActivityCard(icon, label, value, imported = false) {
+  const display = typeof value === 'string' ? value : (typeof value === 'number' && value > 100 ? value.toLocaleString('fr-FR') : value);
+  return `<div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 ${imported ? 'ring-1 ring-emerald-200 dark:ring-emerald-900' : ''}">
     <span class="text-xl">${icon}</span>
-    <p class="mt-2 text-xs text-slate-500">${label}</p>
-    <p class="mt-1 text-xl font-semibold">${typeof value === 'number' && value > 100 ? value.toLocaleString('fr-FR') : value}</p>
+    <p class="mt-2 text-xs text-slate-500">${label}${imported ? ' <span class="text-[9px] text-emerald-600">· import</span>' : ''}</p>
+    <p class="mt-1 text-xl font-semibold">${display}</p>
   </div>`;
 }
 
@@ -271,6 +272,73 @@ function barChart(items, valueKey = 'value', labelKey = 'month') {
   }).join('')}</div>`;
 }
 
+function importTriggerButton() {
+  return `<button type="button" id="import-open-btn" class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 dark:bg-white dark:text-black">
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+    Importer les données
+  </button>`;
+}
+
+function importModalsShell(communes, categories, opts = {}) {
+  const typeLabel = opts.typeLabel || "Type d'infrastructure";
+  const intro = opts.intro || "Renseignez la commune, le type et le fichier à importer.";
+  const options = categories.map(c => {
+    if (typeof c === 'string') return `<option value="${c}">${c}</option>`;
+    return `<option value="${c.key}">${c.label}</option>`;
+  }).join('');
+  return `
+  <div id="import-modal" class="fixed inset-0 z-[60] hidden" aria-hidden="true">
+    <div id="import-modal-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative flex min-h-full items-center justify-center p-4">
+      <div role="dialog" aria-labelledby="import-modal-title" class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+        <h2 id="import-modal-title" class="text-lg font-semibold">Importer des données</h2>
+        <p class="mt-1 text-xs text-slate-500">${intro}</p>
+        <div class="mt-5 space-y-4">
+          <div>
+            <label class="text-xs font-medium text-slate-500">Commune</label>
+            <select id="import-commune" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+              <option value="">— Choisir une commune —</option>
+              ${communes.map(c => `<option value="${c}">${c}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-500">${typeLabel}</label>
+            <select id="import-categorie" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+              <option value="">— Choisir un type —</option>
+              ${options}
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-500">Fichier</label>
+            <input type="file" id="import-file-input" accept=".csv,.json,.xlsx,.xls" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-slate-100 file:px-3 file:py-1 file:text-xs dark:border-slate-700 dark:bg-slate-950 dark:file:bg-slate-800">
+            <p class="mt-1 text-[10px] text-slate-400">CSV, Excel (.xlsx) ou JSON</p>
+          </div>
+          <p id="import-form-error" class="hidden rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300"></p>
+        </div>
+        <div class="mt-6 flex justify-end gap-2">
+          <button type="button" id="import-cancel-btn" class="rounded-lg border border-slate-200 px-4 py-2 text-sm dark:border-slate-700">Annuler</button>
+          <button type="button" id="import-next-btn" class="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black">Continuer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="import-confirm-modal" class="fixed inset-0 z-[60] hidden" aria-hidden="true">
+    <div id="import-confirm-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative flex min-h-full items-center justify-center p-4">
+      <div role="dialog" aria-labelledby="import-confirm-title" class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+        <h2 id="import-confirm-title" class="text-lg font-semibold">Confirmer l'import</h2>
+        <p class="mt-1 text-xs text-slate-500">Vérifiez les informations avant validation.</p>
+        <dl id="import-confirm-summary" class="mt-5 space-y-3 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800/50"></dl>
+        <div class="mt-6 flex justify-end gap-2">
+          <button type="button" id="import-confirm-back-btn" class="rounded-lg border border-slate-200 px-4 py-2 text-sm dark:border-slate-700">Retour</button>
+          <button type="button" id="import-confirm-btn" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Confirmer l'import</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function infraFilterBar(zones, categories, etats) {
   return `<div class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
     <div class="min-w-[120px] flex-1">
@@ -299,27 +367,35 @@ function infraTableRows(items) {
   if (!items.length) {
     return `<div id="infra-empty">${emptyState('Aucune infrastructure dans cette zone')}</div>`;
   }
-  return `<div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-    <table id="infra-table" class="w-full min-w-[720px] text-left text-sm">
-      <thead class="border-b border-slate-200 bg-slate-50 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800/50">
+  return `<div id="infra-table-wrap" class="max-h-[22rem] overflow-auto rounded-xl border border-slate-200 dark:border-slate-800">
+    <table id="infra-table" class="w-full min-w-[960px] text-left text-sm">
+      <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800">
         <tr>
           <th class="px-4 py-3 font-medium">Nom</th>
+          <th class="px-4 py-3 font-medium">Commune</th>
           <th class="px-4 py-3 font-medium">Catégorie</th>
           <th class="px-4 py-3 font-medium">État</th>
-          <th class="px-4 py-3 font-medium">Zone</th>
+          <th class="px-4 py-3 font-medium">Réf.</th>
+          <th class="px-4 py-3 font-medium">Responsable</th>
+          <th class="px-4 py-3 font-medium">Indicateur</th>
           <th class="px-4 py-3 font-medium">Dégrad.</th>
-          <th class="px-4 py-3 font-medium">Source</th>
+          <th class="px-4 py-3 font-medium">Inspection</th>
+          <th class="px-4 py-3 font-medium">Observations</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         ${items.map(i => `
           <tr class="bg-white dark:bg-slate-900 ${i.imported ? 'bg-emerald-50/60 dark:bg-emerald-950/20' : ''}" data-zone="${i.zone || ''}" data-categorie="${i.categorie || ''}" data-etat="${i.etat || ''}">
-            <td class="px-4 py-3 font-medium">${i.nom}${i.imported ? ' <span class="text-[10px] text-emerald-600">↗</span>' : ''}</td>
+            <td class="px-4 py-3 font-medium">${i.nom}${i.imported ? ' <span class="rounded bg-emerald-100 px-1 text-[9px] text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" title="${i.importCommune || i.zone} · ${i.importCategorie || i.categorie}">Import</span>' : ''}</td>
+            <td class="px-4 py-3 text-slate-600">${i.zone}</td>
             <td class="px-4 py-3 text-slate-600">${i.categorie}</td>
             <td class="px-4 py-3">${etatBadge(i.etat)}</td>
-            <td class="px-4 py-3 text-slate-600">${i.zone}</td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-500">${i.reference || '—'}</td>
+            <td class="px-4 py-3 text-xs text-slate-600">${i.responsable || '—'}</td>
+            <td class="px-4 py-3 text-xs">${i.metriqueLabel ? `${i.metriqueValue}${i.metriqueUnit ? ' ' + i.metriqueUnit : ''}` : '—'}<span class="block text-[10px] text-slate-400">${i.metriqueLabel || ''}</span></td>
             <td class="px-4 py-3">${i.degradation}%</td>
-            <td class="px-4 py-3 text-xs text-slate-500">${i.imported ? 'Import' : 'Base'}</td>
+            <td class="px-4 py-3 text-xs text-slate-500">${i.dateInspection ? new Date(i.dateInspection).toLocaleDateString('fr-FR') : '—'}</td>
+            <td class="max-w-[180px] truncate px-4 py-3 text-xs text-slate-500" title="${(i.observations || '').replace(/"/g, '&quot;')}">${i.observations || '—'}</td>
           </tr>`).join('')}
       </tbody>
     </table>

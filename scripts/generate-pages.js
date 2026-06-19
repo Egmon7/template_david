@@ -9,7 +9,7 @@ const head = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PROJET</title>
+  <title>B.E.A.U</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,14 +32,16 @@ const scripts = `
   <script src="../js/interactions.js"></script>
 `;
 
+const xlsxScript = `  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>\n`;
+
 const pages = [
   ['dashboard.html', 'Tableau de bord', 'renderDashboard', null],
-  ['infrastructures.html', 'Gestion des infrastructures', 'renderInfrastructures', 'bindImportHandlers(() => location.reload())'],
+  ['infrastructures.html', 'Gestion des infrastructures', 'renderInfrastructures', "bindImportHandlers(() => location.reload(), 'infra')"],
   ['planification.html', 'Planification urbaine', 'renderPlanning', null],
   ['cartographie.html', 'Cartographie et SIG', 'renderMap', null],
   ['mobilite.html', 'Mobilité et transport', 'renderMobility', null],
-  ['environnement.html', 'Environnement', 'renderEnvironment', null],
-  ['socio-economique.html', 'Activités socio-économiques', 'renderSocioeco', null],
+  ['environnement.html', 'Environnement', 'renderEnvironment', "bindImportHandlers(() => location.reload(), 'env')"],
+  ['socio-economique.html', 'Activités socio-économiques', 'renderSocioeco', "bindImportHandlers(() => location.reload(), 'socio')"],
   ['projets.html', 'Gestion des projets', 'renderProjects', null],
   ['rapports.html', 'Rapports et statistiques', 'renderReports', null],
   ['notifications.html', 'Notifications', 'renderNotifications', null],
@@ -50,7 +52,8 @@ const pages = [
 pages.forEach(([file, title, render, after]) => {
   const afterPart = after ? `, () => { ${after} }` : '';
   const init = `<script>initPage('${file}', '${title}', ${render}${afterPart});</script>`;
-  const html = head + scripts + init + '\n</body>\n</html>\n';
+  const needsXlsx = ['infrastructures.html', 'parametres.html', 'environnement.html', 'socio-economique.html'].includes(file);
+  const html = head + (needsXlsx ? xlsxScript : '') + scripts + init + '\n</body>\n</html>\n';
   fs.writeFileSync(path.join(dir, file), html);
   console.log('Created', file);
 });

@@ -175,26 +175,23 @@ function renderInfrastructures() {
   const all = getAllInfrastructures();
   const stats = getInfraStats();
   const opts = getFilterOptions();
+  const communes = getCommuneNames();
+  const categories = getInfraCategories();
 
   return `
     <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
-      <div><h1 class="text-xl font-semibold">Gestion des infrastructures</h1><p class="text-sm text-slate-500">${stats.total} élément${stats.total > 1 ? 's' : ''} recensé${stats.total > 1 ? 's' : ''}</p></div>
-      <div class="flex flex-wrap gap-2">
-        <label class="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900">Importer CSV / JSON<input type="file" accept=".csv,.json" class="import-file hidden"></label>
-        <a href="../data/exemple-infrastructures.csv" download class="rounded-lg border border-slate-200 px-3 py-2 text-xs dark:border-slate-700">Exemple CSV</a>
-        <a href="../data/exemple-infrastructures.json" download class="rounded-lg border border-slate-200 px-3 py-2 text-xs dark:border-slate-700">Exemple JSON</a>
+      <div>
+        <h1 class="text-xl font-semibold">Gestion des infrastructures</h1>
+        <p class="text-sm text-slate-500">${stats.total} fiche${stats.total > 1 ? 's' : ''} recensée${stats.total > 1 ? 's' : ''}</p>
       </div>
+      ${importTriggerButton()}
     </div>
-    <div id="import-result" class="mb-4 hidden rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"></div>
+    ${importModalsShell(communes, categories)}
+    <div id="import-result" class="mb-4 hidden rounded-lg border px-4 py-3 text-sm"></div>
     <div class="mb-4 flex flex-wrap gap-2">
       ${opts.categories.map(c => `<button type="button" class="filter-tag rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" data-categorie="${c}">${c}</button>`).join('')}
     </div>
     ${infraFilterBar(opts.zones, opts.categories, opts.etats)}
-    <div class="mb-6 grid gap-4 sm:grid-cols-3">
-      ${card('Taux dégradation moyen', stats.avgDegradation + '%')}
-      ${card('Pannes ce mois', stats.totalPannes)}
-      ${card('Budget maintenance', stats.totalMaintenance.toLocaleString('fr-FR') + ' $')}
-    </div>
     ${infraTableRows(all)}`;
 }
 
@@ -299,33 +296,57 @@ function renderMobility() {
 }
 
 function renderEnvironment() {
-  const e = DATA.environment;
+  const { data: e, updatedKeys } = getEnvironmentLive();
+  const communes = getCommuneNames();
   const tone = (v, invert) => {
     const x = invert ? 100 - v : v;
     return x >= 65 ? 'good' : x >= 40 ? 'warn' : 'bad';
   };
-  return `<h1 class="mb-6 text-xl font-semibold">Environnement</h1>
+  return `
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <h1 class="text-xl font-semibold">Environnement</h1>
+      ${importTriggerButton()}
+    </div>
+    ${importModalsShell(communes, ENV_IMPORT_TYPES, {
+      typeLabel: "Type d'information",
+      intro: "Commune, indicateur environnemental et fichier CSV ou Excel.",
+    })}
+    <div id="import-result" class="mb-4 hidden rounded-lg border px-4 py-3 text-sm"></div>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      ${envIndicatorCard('♻️', 'Gestion des déchets', e.wasteManagement, tone(e.wasteManagement))}
-      ${envIndicatorCard('💨', 'Qualité de l\'air', e.airPollution, tone(e.airPollution, true))}
-      ${envIndicatorCard('🔊', 'Pollution sonore', e.noisePollution, tone(e.noisePollution, true))}
-      ${envIndicatorCard('💧', 'Eaux usées', e.wastewater, tone(e.wastewater))}
-      ${envIndicatorCard('🌊', 'Risque inondation', e.floodRisk, tone(e.floodRisk, true))}
-      ${envIndicatorCard('🌳', 'Espaces verts', e.greenSpaces, tone(e.greenSpaces))}
+      ${envIndicatorCard('♻️', 'Gestion des déchets', e.wasteManagement, tone(e.wasteManagement), updatedKeys.has('wasteManagement'))}
+      ${envIndicatorCard('💨', 'Qualité de l\'air', e.airPollution, tone(e.airPollution, true), updatedKeys.has('airPollution'))}
+      ${envIndicatorCard('🔊', 'Pollution sonore', e.noisePollution, tone(e.noisePollution, true), updatedKeys.has('noisePollution'))}
+      ${envIndicatorCard('💧', 'Eaux usées', e.wastewater, tone(e.wastewater), updatedKeys.has('wastewater'))}
+      ${envIndicatorCard('🌊', 'Risque inondation', e.floodRisk, tone(e.floodRisk, true), updatedKeys.has('floodRisk'))}
+      ${envIndicatorCard('🌳', 'Espaces verts', e.greenSpaces, tone(e.greenSpaces), updatedKeys.has('greenSpaces'))}
     </div>`;
 }
 
 function renderSocioeco() {
-  const s = DATA.socioeco;
+  const { data: s, updatedKeys } = getSocioecoLive();
+  const communes = getCommuneNames();
   const items = [
-    ['🏪', 'Commerce', s.commerce], ['🌾', 'Agriculture urbaine', s.urbanAgriculture],
-    ['🔨', 'Artisanat', s.crafts], ['🏭', 'Industrie', s.industry],
-    ['💼', 'Services', s.services], ['🏥', 'Santé', s.health],
-    ['🎓', 'Éducation', s.education], ['👔', 'Emploi', s.employment + '%'],
-    ['💰', 'Revenu moyen', s.avgIncome + ' $'],
+    ['🏪', 'Commerce', s.commerce, 'commerce'],
+    ['🌾', 'Agriculture urbaine', s.urbanAgriculture, 'urbanAgriculture'],
+    ['🔨', 'Artisanat', s.crafts, 'crafts'],
+    ['🏭', 'Industrie', s.industry, 'industry'],
+    ['💼', 'Services', s.services, 'services'],
+    ['🏥', 'Santé', s.health, 'health'],
+    ['🎓', 'Éducation', s.education, 'education'],
+    ['👔', 'Emploi', s.employment + '%', 'employment'],
+    ['💰', 'Revenu moyen', s.avgIncome + ' $', 'avgIncome'],
   ];
-  return `<h1 class="mb-6 text-xl font-semibold">Activités socio-économiques</h1>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${items.map(([icon, l, v]) => socioActivityCard(icon, l, v)).join('')}</div>`;
+  return `
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <h1 class="text-xl font-semibold">Activités socio-économiques</h1>
+      ${importTriggerButton()}
+    </div>
+    ${importModalsShell(communes, SOCIO_IMPORT_TYPES, {
+      typeLabel: "Type d'information",
+      intro: "Commune, type d'activité socio-économique et fichier CSV ou Excel.",
+    })}
+    <div id="import-result" class="mb-4 hidden rounded-lg border px-4 py-3 text-sm"></div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${items.map(([icon, l, v, key]) => socioActivityCard(icon, l, v, updatedKeys.has(key))).join('')}</div>`;
 }
 
 function renderProjects() {
@@ -456,13 +477,16 @@ function renderUsers() {
 
 function renderSettings() {
   const showImport = canAccessPage('infrastructures');
+  const communes = getCommuneNames();
+  const categories = getInfraCategories();
   return `<h1 class="mb-6 text-xl font-semibold">Paramètres</h1>
-    <div class="max-w-lg space-y-6">
+    <div class="max-w-3xl space-y-6">
       ${showImport ? `<div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
         <h2 class="text-sm font-medium">Import de données</h2>
-        <p class="mt-1 text-xs text-slate-500">Envoyez un fichier CSV ou JSON pour enrichir les infrastructures.</p>
-        <label class="mt-4 inline-flex cursor-pointer rounded-lg bg-black px-4 py-2 text-sm text-white dark:bg-white dark:text-black">Choisir un fichier<input type="file" accept=".csv,.json" class="import-file hidden"></label>
-        <div id="import-result-settings" class="mt-3 hidden text-sm text-emerald-600"></div>
+        <p class="mt-1 text-xs text-slate-500">Importer des fiches infrastructure par commune et par type.</p>
+        <div class="mt-4">${importTriggerButton()}</div>
+        ${importModalsShell(communes, categories)}
+        <div id="import-result-settings" class="mt-3 hidden rounded-lg border px-4 py-3 text-sm"></div>
       </div>` : ''}
       <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
         <h2 class="text-sm font-medium">Votre compte</h2>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PROJET</title>
+  <title>B.E.A.U</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +12,7 @@
   <style>html,body{height:100%;overflow-x:hidden}body{font-family:Inter,system-ui,sans-serif}.nav-active{background:rgb(241 245 249);color:rgb(15 23 42);font-weight:500}.dark .nav-active{background:rgb(30 41 59);color:white}@media(min-width:1024px){html,body{height:auto;overflow-x:hidden;overflow-y:auto}}</style>
 </head>
 <body>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
   <script src="../js/mock-data.js"></script>
   <script src="../js/permissions.js"></script>
@@ -22,6 +23,6 @@
   <script src="../js/layout.js"></script>
   <script src="../js/renders.js"></script>
   <script src="../js/interactions.js"></script>
-<script>initPage('infrastructures.html', 'Gestion des infrastructures', renderInfrastructures, () => { bindImportHandlers(() => location.reload()) });</script>
+<script>initPage('infrastructures.html', 'Gestion des infrastructures', renderInfrastructures, () => { bindImportHandlers(() => location.reload(), 'infra') });</script>
 </body>
 </html>
