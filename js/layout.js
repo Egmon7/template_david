@@ -106,10 +106,10 @@ function getShell(activeFile, session) {
     <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/50 lg:hidden" aria-hidden="true"></div>
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex h-full w-[min(18rem,88vw)] -translate-x-full flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:max-h-screen lg:w-64 lg:shrink-0 lg:translate-x-0 lg:shadow-none dark:border-slate-800 dark:bg-slate-900">
       <div class="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
-        <a href="../index.html" class="block leading-tight">
+        <div class="block leading-tight">
           <span class="text-base font-semibold tracking-tight">${APP_NAME}</span>
           <span class="mt-0.5 block text-[10px] font-normal text-slate-400">${APP_TAGLINE}</span>
-        </a>
+        </div>
         <button type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" onclick="toggleSidebar(false)" aria-label="Fermer le menu">
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
