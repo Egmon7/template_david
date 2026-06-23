@@ -284,6 +284,42 @@ window.MOCK_DATA = {
       "dateInspection": "2026-04-30",
       "lits": 48,
       "observations": "Stock médicaments à renforcer — ambulance disponible 24h/24"
+    },
+    {
+      "id": 13,
+      "nom": "Port fluvial de Kinshasa",
+      "categorie": "Ports",
+      "etat": "Moyen",
+      "zone": "Gombe",
+      "degradation": 38,
+      "pannes": 1,
+      "maintenance": 125000,
+      "capacite_t": 2400,
+      "observations": "Quais à moderniser — trafic marchandises en hausse"
+    },
+    {
+      "id": 14,
+      "nom": "Ligne ferroviaire Matadi-Kinshasa",
+      "categorie": "Voies ferrées",
+      "etat": "Dégradé",
+      "zone": "Masina",
+      "degradation": 55,
+      "pannes": 3,
+      "maintenance": 210000,
+      "longueur_km": 18.4,
+      "observations": "Voies vieillissantes — renouvellement partiel prévu 2027"
+    },
+    {
+      "id": 15,
+      "nom": "Musée national de Kinshasa",
+      "categorie": "Installations culturelles",
+      "etat": "Bon",
+      "zone": "Gombe",
+      "degradation": 18,
+      "pannes": 0,
+      "maintenance": 42000,
+      "capacite": 350,
+      "observations": "Programme culturel actif — accueil visiteurs en progression"
     }
   ],
   "categories": [
@@ -296,7 +332,10 @@ window.MOCK_DATA = {
     "Marchés",
     "Bâtiments administratifs",
     "Espaces verts",
-    "Installations sportives"
+    "Installations sportives",
+    "Ports",
+    "Voies ferrées",
+    "Installations culturelles"
   ],
   "mapZones": [
     {
@@ -468,6 +507,97 @@ window.MOCK_DATA = {
       "infra": 143
     }
   ],
+  "geography": {
+    "populationGrowth": 2.8,
+    "landConflicts": 34,
+    "activeParcels": 1280,
+    "housingNeeds": 45000,
+    "urbanPopulation": 15200000,
+    "householdCount": 2840000,
+    "householdSize": 5.4,
+    "landActors": [
+      "Cadastre provincial",
+      "Assainissement",
+      "Chefferies coutumières",
+      "Communes"
+    ],
+    "householdSurveys": [
+      {
+        "commune": "Gombe",
+        "label": "Enquête ODK 2025",
+        "households": 1240,
+        "avgSize": 5.2,
+        "source": "ODK / Équipe terrain"
+      },
+      {
+        "commune": "Matete",
+        "label": "Recensement participatif",
+        "households": 2860,
+        "avgSize": 6.1,
+        "source": "Archives communales"
+      },
+      {
+        "commune": "Lemba",
+        "label": "Diagnostic habitat informel",
+        "households": 1920,
+        "avgSize": 5.8,
+        "source": "Partenaire technique"
+      }
+    ]
+  },
+  "heritage": {
+    "historicSites": 12,
+    "naturalSpaces": 8,
+    "touristSites": 5,
+    "landscapeZones": 6
+  },
+  "sourcesCatalog": [
+    {
+      "id": 1,
+      "title": "Schéma directeur d'aménagement urbain — Kinshasa",
+      "type": "Planification",
+      "domain": "Urbanisme",
+      "origin": "Ministère de l'Urbanisme",
+      "date": "2023",
+      "format": "PDF"
+    },
+    {
+      "id": 2,
+      "title": "Enquête habitat-ménages — Commune de Gombe",
+      "type": "Enquête",
+      "domain": "Géographie",
+      "origin": "ODK / Équipe terrain",
+      "date": "2025",
+      "format": "CSV"
+    },
+    {
+      "id": 3,
+      "title": "Couches infrastructures voirie",
+      "type": "SIG",
+      "domain": "Infrastructures",
+      "origin": "ArcGIS",
+      "date": "2024",
+      "format": "GeoJSON"
+    },
+    {
+      "id": 4,
+      "title": "Étude pollution sonore axe Matete",
+      "type": "Étude",
+      "domain": "Environnement",
+      "origin": "Partenaire technique",
+      "date": "2024",
+      "format": "PDF"
+    },
+    {
+      "id": 5,
+      "title": "Recensement activités économiques locales",
+      "type": "Enquête",
+      "domain": "Économie",
+      "origin": "Administration provinciale",
+      "date": "2025",
+      "format": "Excel"
+    }
+  ],
   "planning": {
     "residential": 38,
     "commercial": 22,
@@ -491,6 +621,49 @@ window.MOCK_DATA = {
         "quartier": "Bandal",
         "growth": 6
       }
+    ],
+    "growthZones": [
+      {
+        "name": "Pôle Limete Est",
+        "commune": "Limete",
+        "areaHa": 120,
+        "potential": "Résidentiel",
+        "horizon": "2028"
+      },
+      {
+        "name": "Extension Ngaliema Nord",
+        "commune": "Ngaliema",
+        "areaHa": 85,
+        "potential": "Mixte",
+        "horizon": "2027"
+      },
+      {
+        "name": "Zone industrielle Masina",
+        "commune": "Masina",
+        "areaHa": 64,
+        "potential": "Industriel",
+        "horizon": "2029"
+      }
+    ],
+    "tripGenerators": [
+      {
+        "name": "Marché central",
+        "commune": "Gombe",
+        "dailyTrips": 18500,
+        "mode": "Moto / bus"
+      },
+      {
+        "name": "Université de Kinshasa",
+        "commune": "Lemba",
+        "dailyTrips": 14200,
+        "mode": "Bus / marche"
+      },
+      {
+        "name": "Gare centrale",
+        "commune": "Gombe",
+        "dailyTrips": 9800,
+        "mode": "Taxi / moto"
+      }
     ]
   },
   "mobility": {
@@ -510,7 +683,10 @@ window.MOCK_DATA = {
     "noisePollution": 62,
     "wastewater": 71,
     "floodRisk": 45,
-    "greenSpaces": 82
+    "greenSpaces": 82,
+    "waterResources": 72,
+    "environmentalRisks": 38,
+    "tourism": 64
   },
   "socioeco": {
     "commerce": 2400,
@@ -521,7 +697,12 @@ window.MOCK_DATA = {
     "health": 89,
     "education": 156,
     "employment": 67,
-    "avgIncome": 285
+    "avgIncome": 285,
+    "localFinances": 1280000,
+    "municipalBudget": 45,
+    "householdCount": 2840000,
+    "householdSize": 5.4,
+    "householdsInformal": 62
   },
   "projects": [
     {
@@ -530,7 +711,10 @@ window.MOCK_DATA = {
       "status": "todo",
       "priority": "Haute",
       "budget": 450000,
-      "progress": 15
+      "progress": 15,
+      "category": "Réseaux d'eau potable",
+      "commune": "Lingwala",
+      "description": "Remplacement des conduites principales et raccordements ménages — secteur 4 Lingwala."
     },
     {
       "id": 2,
@@ -538,7 +722,10 @@ window.MOCK_DATA = {
       "status": "inprogress",
       "priority": "Critique",
       "budget": 1200000,
-      "progress": 45
+      "progress": 45,
+      "category": "Ponts",
+      "commune": "Kasa-Vubu",
+      "description": "Renforcement structurel et reprise des appuis du pont — axe Kasa-Vubu."
     },
     {
       "id": 3,
@@ -546,7 +733,10 @@ window.MOCK_DATA = {
       "status": "inprogress",
       "priority": "Moyenne",
       "budget": 320000,
-      "progress": 70
+      "progress": 70,
+      "category": "Réseaux électriques",
+      "commune": "Matete",
+      "description": "Installation LED et maintenance réseau éclairage public Matete."
     },
     {
       "id": 4,
@@ -554,7 +744,10 @@ window.MOCK_DATA = {
       "status": "review",
       "priority": "Moyenne",
       "budget": 890000,
-      "progress": 90
+      "progress": 90,
+      "category": "Écoles",
+      "commune": "Bandalungwa",
+      "description": "Extension salles de classe et blocs sanitaires — école Bandalungwa."
     },
     {
       "id": 5,
@@ -562,7 +755,43 @@ window.MOCK_DATA = {
       "status": "done",
       "priority": "Haute",
       "budget": 560000,
-      "progress": 100
+      "progress": 100,
+      "category": "Routes et voiries",
+      "commune": "Masina",
+      "description": "Réseau drainage primaire zone Nord-Est Masina — phase terminée."
+    },
+    {
+      "id": 6,
+      "title": "Modernisation quai port fluvial",
+      "status": "inprogress",
+      "priority": "Haute",
+      "budget": 980000,
+      "progress": 30,
+      "category": "Ports",
+      "commune": "Gombe",
+      "description": "Modernisation des quais et équipements de manutention port fluvial."
+    },
+    {
+      "id": 7,
+      "title": "Réhabilitation voie ferrée Matadi",
+      "status": "todo",
+      "priority": "Moyenne",
+      "budget": 2100000,
+      "progress": 5,
+      "category": "Voies ferrées",
+      "commune": "Masina",
+      "description": "Renouvellement rails et signalisation ligne Matadi–Kinshasa."
+    },
+    {
+      "id": 8,
+      "title": "Restauration musée national",
+      "status": "inprogress",
+      "priority": "Moyenne",
+      "budget": 175000,
+      "progress": 55,
+      "category": "Installations culturelles",
+      "commune": "Gombe",
+      "description": "Restauration façades et salles d'exposition musée national."
     }
   ],
   "reports": [
@@ -645,5 +874,4 @@ window.MOCK_DATA = {
       "avatar": "DT"
     }
   ]
-}
-;
+};

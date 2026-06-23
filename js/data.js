@@ -11,6 +11,9 @@ const SECTOR_MAP = {
   'Bâtiments administratifs': 'Autres',
   'Espaces verts': 'Autres',
   'Installations sportives': 'Autres',
+  'Ports': 'Autres',
+  'Voies ferrées': 'Routes',
+  'Installations culturelles': 'Autres',
 };
 
 function getImportedRows() {
@@ -74,6 +77,9 @@ const METRIQUE_BY_CATEGORIE = {
   'Bâtiments administratifs': { key: 'surface_m2', label: 'Surface', unit: 'm²' },
   'Espaces verts': { key: 'surface_ha', label: 'Surface', unit: 'ha' },
   'Installations sportives': { key: 'capacite', label: 'Capacité', unit: 'places' },
+  'Ports': { key: 'capacite_t', label: 'Capacité', unit: 't/j' },
+  'Voies ferrées': { key: 'longueur_km', label: 'Longueur', unit: 'km' },
+  'Installations culturelles': { key: 'capacite', label: 'Capacité', unit: 'places' },
 };
 
 const RESPONSABLES_PAR_COMMUNE = {
@@ -242,6 +248,9 @@ const ENV_IMPORT_TYPES = [
   { key: 'wastewater', label: 'Eaux usées' },
   { key: 'floodRisk', label: "Risque d'inondation" },
   { key: 'greenSpaces', label: 'Espaces verts' },
+  { key: 'waterResources', label: 'Ressources en eau' },
+  { key: 'environmentalRisks', label: 'Risques environnementaux' },
+  { key: 'tourism', label: 'Potentiel touristique' },
 ];
 
 const SOCIO_IMPORT_TYPES = [
@@ -254,6 +263,28 @@ const SOCIO_IMPORT_TYPES = [
   { key: 'education', label: 'Éducation' },
   { key: 'employment', label: 'Emploi' },
   { key: 'avgIncome', label: 'Revenu moyen' },
+  { key: 'localFinances', label: 'Finances locales' },
+  { key: 'municipalBudget', label: 'Budget communal exécuté (%)' },
+  { key: 'householdCount', label: 'Nombre de ménages' },
+  { key: 'householdSize', label: 'Taille moyenne du ménage' },
+  { key: 'householdsInformal', label: 'Habitat informel (%)' },
+];
+
+const GEO_IMPORT_TYPES = [
+  { key: 'householdSurvey', label: 'Enquête habitat-ménage' },
+  { key: 'populationGrowth', label: 'Croissance démographique (%)' },
+  { key: 'landConflicts', label: 'Conflits fonciers' },
+  { key: 'housingNeeds', label: 'Besoins habitat' },
+  { key: 'householdCount', label: 'Nombre de ménages' },
+  { key: 'householdSize', label: 'Taille moyenne du ménage' },
+];
+
+const URBANISM_IMPORT_TYPES = [
+  { key: 'growthZone', label: 'Zone de croissance' },
+  { key: 'tripGenerator', label: 'Générateur de déplacements' },
+  { key: 'availableLand', label: 'Réserve foncière (ha)' },
+  { key: 'residential', label: 'Zone résidentielle (%)' },
+  { key: 'commercial', label: 'Zone commerciale (%)' },
 ];
 
 function getImportedEnvRows() {
@@ -303,16 +334,194 @@ function mergeImportedMetrics(base, imports) {
   const updatedKeys = new Set();
   const byKey = {};
   imports.forEach((r) => {
-    if (!r.typeKey) return;
+    if (!r.typeKey || !Number.isFinite(r.valeur)) return;
     if (!byKey[r.typeKey]) byKey[r.typeKey] = [];
-    byKey[r.typeKey].push(Number(r.valeur) || 0);
+    byKey[r.typeKey].push(Number(r.valeur));
   });
   Object.entries(byKey).forEach(([key, vals]) => {
-    if (data[key] === undefined || !vals.length) return;
-    data[key] = Math.round(vals.reduce((a, v) => a + v, 0) / vals.length);
+    if (!vals.length) return;
+    const avg = vals.reduce((a, v) => a + v, 0) / vals.length;
+    data[key] = Number.isInteger(data[key]) && !Number.isInteger(avg)
+      ? Math.round(avg * 10) / 10
+      : Math.round(avg);
     updatedKeys.add(key);
   });
   return { data, updatedKeys };
+}
+
+function createImportedRowsStore(storageKey) {
+  return {
+    get() {
+      try {
+        return JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+      } catch {
+        return [];
+      }
+    },
+    add(rows, context = {}) {
+      const stamped = rows.map(r => ({
+        ...r,
+        commune: r.commune || context.commune || '',
+        typeKey: r.typeKey || context.typeKey || '',
+        typeLabel: r.typeLabel || context.typeLabel || '',
+        imported: true,
+      }));
+      const all = [...this.get(), ...stamped];
+      sessionStorage.setItem(storageKey, JSON.stringify(all));
+      return all;
+    },
+  };
+}
+
+const geoImportStore = createImportedRowsStore('beau_imported_geo');
+const urbanImportStore = createImportedRowsStore('beau_imported_urban');
+
+function getImportedGeoRows() { return geoImportStore.get(); }
+function addImportedGeoRows(rows, context) { return geoImportStore.add(rows, context); }
+function getImportedUrbanRows() { return urbanImportStore.get(); }
+function addImportedUrbanRows(rows, context) { return urbanImportStore.add(rows, context); }
+
+function getGeographyLive() {
+  return mergeImportedMetrics(DATA?.geography || {}, getImportedGeoRows());
+}
+
+function getUrbanismLive() {
+  return mergeImportedMetrics(DATA?.planning || {}, getImportedUrbanRows());
+}
+
+function getGeographySurveys() {
+  const base = DATA?.geography?.householdSurveys || [];
+  const imported = getImportedGeoRows()
+    .filter(r => r.typeKey === 'householdSurvey')
+    .map(r => ({
+      commune: r.commune,
+      label: r.nom,
+      households: Number(r.valeur) || 0,
+      avgSize: r.avgSize ?? null,
+      source: r.observations || 'Import session',
+      imported: true,
+    }));
+  return [...base, ...imported];
+}
+
+function getGrowthZones() {
+  const base = DATA?.planning?.growthZones || [];
+  const imported = getImportedUrbanRows()
+    .filter(r => r.typeKey === 'growthZone')
+    .map(r => ({
+      name: r.nom,
+      commune: r.commune,
+      areaHa: Number(r.valeur) || 0,
+      potential: r.potential || r.observations || '—',
+      horizon: r.horizon || '—',
+      imported: true,
+    }));
+  return [...base, ...imported];
+}
+
+function getTripGenerators() {
+  const base = DATA?.planning?.tripGenerators || [];
+  const imported = getImportedUrbanRows()
+    .filter(r => r.typeKey === 'tripGenerator')
+    .map(r => ({
+      name: r.nom,
+      commune: r.commune,
+      dailyTrips: Number(r.valeur) || 0,
+      mode: r.mode || r.observations || '—',
+      imported: true,
+    }));
+  return [...base, ...imported];
+}
+
+
+function getAddedProjects() {
+  try {
+    return JSON.parse(sessionStorage.getItem(PROJECTS_ADDED_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function getProjectUpdates() {
+  try {
+    return JSON.parse(sessionStorage.getItem(PROJECTS_UPDATES_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function getAllProjects() {
+  const updates = getProjectUpdates();
+  const base = (DATA?.projects || []).map(p => ({
+    ...p,
+    description: p.description || '',
+    ...(updates[String(p.id)] || {}),
+  }));
+  return [...base, ...getAddedProjects()];
+}
+
+function getNextProjectId() {
+  const ids = getAllProjects().map(p => Number(p.id) || 0);
+  return (ids.length ? Math.max(...ids) : 0) + 1;
+}
+
+function addProject(project) {
+  const entry = {
+    id: getNextProjectId(),
+    title: project.title,
+    description: project.description || '',
+    status: project.status || 'todo',
+    priority: project.priority || 'Moyenne',
+    budget: Number(project.budget) || 0,
+    progress: Math.min(100, Math.max(0, Number(project.progress) || 0)),
+    category: project.category || '',
+    commune: project.commune || '',
+    created: true,
+  };
+  const all = [...getAddedProjects(), entry];
+  sessionStorage.setItem(PROJECTS_ADDED_KEY, JSON.stringify(all));
+  return entry;
+}
+
+function updateProject(id, patch) {
+  const key = String(id);
+  const added = getAddedProjects();
+  const idx = added.findIndex(p => String(p.id) === key);
+  if (idx >= 0) {
+    const updated = {
+      ...added[idx],
+      ...patch,
+      progress: patch.progress !== undefined
+        ? Math.min(100, Math.max(0, Number(patch.progress) || 0))
+        : added[idx].progress,
+      budget: patch.budget !== undefined ? Number(patch.budget) || 0 : added[idx].budget,
+    };
+    if (updated.status === 'done') updated.progress = 100;
+    added[idx] = updated;
+    sessionStorage.setItem(PROJECTS_ADDED_KEY, JSON.stringify(added));
+    return updated;
+  }
+  const updates = getProjectUpdates();
+  const merged = {
+    ...(updates[key] || {}),
+    ...patch,
+    progress: patch.progress !== undefined
+      ? Math.min(100, Math.max(0, Number(patch.progress) || 0))
+      : updates[key]?.progress,
+    budget: patch.budget !== undefined ? Number(patch.budget) || 0 : updates[key]?.budget,
+  };
+  if (merged.status === 'done') merged.progress = 100;
+  updates[key] = merged;
+  sessionStorage.setItem(PROJECTS_UPDATES_KEY, JSON.stringify(updates));
+  return getAllProjects().find(p => String(p.id) === key);
+}
+
+function getProjectsStats() {
+  const all = getAllProjects();
+  return {
+    total: all.length,
+    active: all.filter(p => p.status !== 'done').length,
+  };
 }
 
 function getEnvironmentLive() {

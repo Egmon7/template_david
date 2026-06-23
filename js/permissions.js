@@ -1,11 +1,12 @@
 const PAGE_FILES = {
   dashboard: 'dashboard.html',
+  geography: 'geographie-demographie.html',
+  urbanism: 'urbanisme.html',
   infrastructures: 'infrastructures.html',
-  planning: 'planification.html',
-  map: 'cartographie.html',
-  mobility: 'mobilite.html',
+  economymob: 'economie-mobilite.html',
   environment: 'environnement.html',
-  socioeco: 'socio-economique.html',
+  sources: 'sources.html',
+  map: 'cartographie.html',
   projects: 'projets.html',
   reports: 'rapports.html',
   notifications: 'notifications.html',
@@ -15,12 +16,13 @@ const PAGE_FILES = {
 
 const PAGE_LABELS = {
   dashboard: 'Tableau de bord',
+  geography: 'Géographie',
+  urbanism: 'Urbanisme',
   infrastructures: 'Infrastructures',
-  planning: 'Planification',
-  map: 'Cartographie SIG',
-  mobility: 'Mobilité',
+  economymob: 'Économie & mobilité',
   environment: 'Environnement',
-  socioeco: 'Socio-économique',
+  sources: 'Sources',
+  map: 'Cartographie SIG',
   projects: 'Projets',
   reports: 'Rapports',
   notifications: 'Notifications',
@@ -35,19 +37,19 @@ const ROLES = {
   },
   infra: {
     label: 'Responsable Infrastructures',
-    pages: ['dashboard', 'infrastructures', 'reports', 'notifications', 'settings'],
+    pages: ['dashboard', 'infrastructures', 'sources', 'reports', 'notifications', 'settings'],
   },
   sig: {
     label: 'Analyste SIG',
-    pages: ['dashboard', 'planning', 'map', 'reports', 'notifications', 'settings'],
+    pages: ['dashboard', 'geography', 'urbanism', 'map', 'sources', 'reports', 'notifications', 'settings'],
   },
   env: {
     label: 'Responsable Environnement',
-    pages: ['dashboard', 'environment', 'socioeco', 'reports', 'notifications', 'settings'],
+    pages: ['dashboard', 'environment', 'economymob', 'sources', 'reports', 'notifications', 'settings'],
   },
   projet: {
     label: 'Chef de Projet',
-    pages: ['dashboard', 'projects', 'planning', 'mobility', 'reports', 'notifications', 'settings'],
+    pages: ['dashboard', 'projects', 'urbanism', 'economymob', 'sources', 'reports', 'notifications', 'settings'],
   },
   visiteur: {
     label: 'Visiteur',

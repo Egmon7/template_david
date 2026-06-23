@@ -1,6 +1,43 @@
 let pendingImport = null;
 let activeImportMode = 'infra';
 
+function metricImportNormalize(raw, ctx) {
+  const lower = {};
+  Object.entries(raw).forEach(([k, v]) => { lower[k.toLowerCase().trim()] = v; });
+  const valeur = lower.valeur ?? lower.value ?? lower.valeur_pct ?? lower.pourcentage ?? lower.montant ?? lower.nombre ?? lower.deplacements;
+  const parsed = Number(String(valeur ?? '').replace(',', '.'));
+  const avgSize = lower.taille ?? lower.avg_size ?? lower.avgsize;
+  const avgParsed = avgSize !== undefined ? Number(String(avgSize).replace(',', '.')) : NaN;
+  return {
+    commune: lower.commune || lower.zone || ctx.commune || '',
+    typeKey: ctx.typeKey || '',
+    typeLabel: ctx.typeLabel || '',
+    nom: lower.nom || lower.name || lower.label || lower.libelle || lower.libellé || '',
+    valeur: Number.isFinite(parsed) ? parsed : NaN,
+    avgSize: Number.isFinite(avgParsed) ? avgParsed : undefined,
+    potential: lower.potentiel || lower.potential || '',
+    horizon: lower.horizon || '',
+    mode: lower.mode || lower.transport || '',
+    observations: lower.observations || lower.observation || lower.source || '',
+  };
+}
+
+function createMetricImportMode(addRows, opts = {}) {
+  return {
+    typeLabel: opts.typeLabel || "Type d'information",
+    confirmTypeLabel: opts.confirmTypeLabel || 'Information',
+    intro: opts.intro || "Renseignez la commune, le type d'information et le fichier à importer.",
+    missingType: opts.missingType || "Veuillez sélectionner un type d'information.",
+    emptyRows: 'Aucune ligne valide. Le fichier doit contenir une colonne « valeur » ou « nom ».',
+    addRows,
+    normalize: metricImportNormalize,
+    isValidRow(row) {
+      return Number.isFinite(row.valeur) || Boolean(row.nom);
+    },
+    successMsg: (n, ctx) => `${n} enregistrement(s) importé(s) — ${ctx.commune} · ${ctx.typeLabel}.`,
+  };
+}
+
 const IMPORT_MODES = {
   infra: {
     typeLabel: "Type d'infrastructure",
@@ -33,58 +70,18 @@ const IMPORT_MODES = {
     },
     successMsg: (n, ctx) => `${n} fiche(s) importée(s) pour ${ctx.commune} · ${ctx.typeLabel}.`,
   },
-  env: {
-    typeLabel: "Type d'information",
-    confirmTypeLabel: 'Information',
+  env: createMetricImportMode((rows, ctx) => addImportedEnvRows(rows, ctx), {
     intro: "Renseignez la commune, le type d'indicateur environnemental et le fichier à importer.",
-    missingType: "Veuillez sélectionner un type d'information.",
-    emptyRows: 'Aucune ligne valide. Le fichier doit contenir une colonne « valeur » (ou « value »).',
-    addRows: (rows, ctx) => addImportedEnvRows(rows, ctx),
-    normalize(raw, ctx) {
-      const lower = {};
-      Object.entries(raw).forEach(([k, v]) => { lower[k.toLowerCase().trim()] = v; });
-      const valeur = lower.valeur ?? lower.value ?? lower.valeur_pct ?? lower.pourcentage ?? lower.montant;
-      const parsed = Number(String(valeur ?? '').replace(',', '.'));
-      return {
-        commune: lower.commune || lower.zone || ctx.commune || '',
-        typeKey: ctx.typeKey || '',
-        typeLabel: ctx.typeLabel || '',
-        nom: lower.nom || lower.label || lower.libelle || lower.libellé || 'Mesure',
-        valeur: Number.isFinite(parsed) ? parsed : NaN,
-        observations: lower.observations || lower.observation || '',
-      };
-    },
-    isValidRow(row) {
-      return Number.isFinite(row.valeur);
-    },
-    successMsg: (n, ctx) => `${n} mesure(s) importée(s) — ${ctx.commune} · ${ctx.typeLabel}.`,
-  },
-  socio: {
-    typeLabel: "Type d'information",
-    confirmTypeLabel: 'Information',
+  }),
+  socio: createMetricImportMode((rows, ctx) => addImportedSocioRows(rows, ctx), {
     intro: "Renseignez la commune, le type d'activité socio-économique et le fichier à importer.",
-    missingType: "Veuillez sélectionner un type d'information.",
-    emptyRows: 'Aucune ligne valide. Le fichier doit contenir une colonne « valeur » (ou « value »).',
-    addRows: (rows, ctx) => addImportedSocioRows(rows, ctx),
-    normalize(raw, ctx) {
-      const lower = {};
-      Object.entries(raw).forEach(([k, v]) => { lower[k.toLowerCase().trim()] = v; });
-      const valeur = lower.valeur ?? lower.value ?? lower.montant ?? lower.nombre;
-      const parsed = Number(String(valeur ?? '').replace(',', '.'));
-      return {
-        commune: lower.commune || lower.zone || ctx.commune || '',
-        typeKey: ctx.typeKey || '',
-        typeLabel: ctx.typeLabel || '',
-        nom: lower.nom || lower.label || lower.libelle || lower.libellé || 'Mesure',
-        valeur: Number.isFinite(parsed) ? parsed : NaN,
-        observations: lower.observations || lower.observation || '',
-      };
-    },
-    isValidRow(row) {
-      return Number.isFinite(row.valeur);
-    },
-    successMsg: (n, ctx) => `${n} mesure(s) importée(s) — ${ctx.commune} · ${ctx.typeLabel}.`,
-  },
+  }),
+  geo: createMetricImportMode((rows, ctx) => addImportedGeoRows(rows, ctx), {
+    intro: "Renseignez la commune, le type d'enquête ou indicateur géographique et le fichier à importer.",
+  }),
+  urbanism: createMetricImportMode((rows, ctx) => addImportedUrbanRows(rows, ctx), {
+    intro: "Renseignez la commune, le type d'information d'urbanisme et le fichier à importer.",
+  }),
 };
 
 function getImportContext() {

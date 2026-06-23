@@ -1,5 +1,5 @@
-function card(title, value, sub = '', color = '') {
-  return `<div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+function card(title, value, sub = '', color = '', extraClass = '') {
+  return `<div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 ${extraClass}">
     <p class="text-xs text-slate-500">${title}</p>
     <p class="mt-1 text-2xl font-semibold ${color}">${value}</p>
     ${sub ? `<p class="mt-1 text-xs text-slate-400">${sub}</p>` : ''}
@@ -334,6 +334,81 @@ function importModalsShell(communes, categories, opts = {}) {
           <button type="button" id="import-confirm-back-btn" class="rounded-lg border border-slate-200 px-4 py-2 text-sm dark:border-slate-700">Retour</button>
           <button type="button" id="import-confirm-btn" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Confirmer l'import</button>
         </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function projectFormModal(communes, categories) {
+  const communeOpts = communes.map(c => `<option value="${c}">${c}</option>`).join('');
+  const categoryOpts = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+  return `
+  <div id="project-form-modal" class="fixed inset-0 z-[60] hidden" aria-hidden="true">
+    <div id="project-form-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative flex min-h-full items-center justify-center p-4">
+      <div role="dialog" aria-labelledby="project-form-title" class="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+        <h2 id="project-form-title" class="text-lg font-semibold">Nouveau projet</h2>
+        <p class="mt-1 text-xs text-slate-500">Renseignez les informations du projet urbain.</p>
+        <form id="project-form" class="mt-5 space-y-4">
+          <input type="hidden" id="project-id" value="">
+          <div>
+            <label for="project-title" class="text-xs font-medium text-slate-500">Intitulé *</label>
+            <input id="project-title" type="text" required class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" placeholder="Ex. Réfection voirie secteur 3">
+          </div>
+          <div>
+            <label for="project-description" class="text-xs font-medium text-slate-500">Description</label>
+            <textarea id="project-description" rows="3" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" placeholder="Objectifs, périmètre, partenaires…"></textarea>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="project-status" class="text-xs font-medium text-slate-500">État</label>
+              <select id="project-status" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+                <option value="todo">À faire</option>
+                <option value="inprogress">En cours</option>
+                <option value="review">Revue</option>
+                <option value="done">Terminé</option>
+              </select>
+            </div>
+            <div>
+              <label for="project-priority" class="text-xs font-medium text-slate-500">Priorité</label>
+              <select id="project-priority" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+                <option value="Basse">Basse</option>
+                <option value="Moyenne" selected>Moyenne</option>
+                <option value="Haute">Haute</option>
+                <option value="Critique">Critique</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="project-budget" class="text-xs font-medium text-slate-500">Budget ($)</label>
+              <input id="project-budget" type="number" min="0" step="1000" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" placeholder="450000">
+            </div>
+            <div>
+              <label for="project-progress" class="text-xs font-medium text-slate-500">Avancement (<span id="project-progress-label">0</span>%)</label>
+              <input id="project-progress" type="range" min="0" max="100" value="0" class="mt-3 w-full accent-black dark:accent-white">
+            </div>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="project-commune" class="text-xs font-medium text-slate-500">Commune</label>
+              <select id="project-commune" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+                <option value="">—</option>${communeOpts}
+              </select>
+            </div>
+            <div>
+              <label for="project-category" class="text-xs font-medium text-slate-500">Catégorie infrastructure</label>
+              <select id="project-category" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+                <option value="">—</option>${categoryOpts}
+              </select>
+            </div>
+          </div>
+          <p id="project-form-error" class="hidden text-xs text-red-600"></p>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" id="project-cancel-btn" class="rounded-lg border border-slate-200 px-4 py-2 text-sm dark:border-slate-700">Annuler</button>
+            <button type="submit" id="project-save-btn" class="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black">Enregistrer</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>`;

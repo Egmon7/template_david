@@ -27,13 +27,15 @@ function renderDashboard() {
   ].slice(0, 5);
 
   const quickLinks = [
-    canAccessPage('infrastructures') && { file: 'infrastructures.html', label: 'Infrastructures', desc: `${stats.total} actifs` },
-    canAccessPage('map') && { file: 'cartographie.html', label: 'Cartographie', desc: '24 communes' },
+    canAccessPage('geography') && { file: 'geographie-demographie.html', label: 'Géographie', desc: 'Foncier & démographie' },
+    canAccessPage('urbanism') && { file: 'urbanisme.html', label: 'Urbanisme', desc: 'Aménagement du territoire' },
+    canAccessPage('infrastructures') && { file: 'infrastructures.html', label: 'Infrastructures', desc: `${stats.total} fiches` },
+    canAccessPage('economymob') && { file: 'economie-mobilite.html', label: 'Économie & mobilité', desc: `Accessibilité ${mob.accessibility}%` },
+    canAccessPage('environment') && { file: 'environnement.html', label: 'Environnement', desc: `Espaces verts ${env.greenSpaces}%` },
+    canAccessPage('sources') && { file: 'sources.html', label: 'Sources', desc: 'Archives & études' },
+    canAccessPage('map') && { file: 'cartographie.html', label: 'Cartographie SIG', desc: '24 communes' },
     canAccessPage('projects') && { file: 'projets.html', label: 'Projets', desc: `${s.projectsInProgress} en cours` },
     canAccessPage('reports') && { file: 'rapports.html', label: 'Rapports', desc: 'Exporter les données' },
-    canAccessPage('environment') && { file: 'environnement.html', label: 'Environnement', desc: `Indice ${env.greenSpaces}%` },
-    canAccessPage('mobility') && { file: 'mobilite.html', label: 'Mobilité', desc: `Accessibilité ${mob.accessibility}%` },
-    canAccessPage('planning') && { file: 'planification.html', label: 'Planification', desc: 'Zones et densité' },
   ].filter(Boolean);
 
   const roleTagline = {
@@ -62,7 +64,7 @@ function renderDashboard() {
       </div>` : '';
 
   const pulseItems = [
-    canAccessPage('mobility') && { label: 'Mobilité', value: mob.accessibility, color: 'bg-black dark:bg-white' },
+    canAccessPage('economymob') && { label: 'Mobilité', value: mob.accessibility, color: 'bg-black dark:bg-white' },
     canAccessPage('environment') && { label: 'Espaces verts', value: env.greenSpaces, color: 'bg-emerald-500' },
     canAccessPage('environment') && { label: 'Risque inondation', value: env.floodRisk, color: 'bg-amber-500' },
     canAccessPage('projects') && { label: 'Projets actifs', value: s.projectsInProgress, bar: false },
@@ -171,6 +173,30 @@ function renderDashboard() {
     </div>` : ''}`;
 }
 
+function domainListTable(headers, rows) {
+  if (!rows.length) {
+    return '<p class="text-sm text-slate-500">Aucune donnée pour le moment.</p>';
+  }
+  return `
+    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+      <table class="w-full min-w-[560px] text-left text-sm">
+        <thead class="border-b border-slate-200 bg-slate-50 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800/50">
+          <tr>${headers.map(h => `<th class="px-4 py-3 font-medium">${h}</th>`).join('')}</tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          ${rows.map(cells => `
+            <tr class="bg-white dark:bg-slate-900">
+              ${cells.map((c, i) => `<td class="px-4 py-3 ${i === 0 ? 'font-medium' : 'text-slate-600'}">${c}</td>`).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function importedBadge(row) {
+  return row.imported ? ' <span class="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">import</span>' : '';
+}
+
 function renderInfrastructures() {
   const all = getAllInfrastructures();
   const stats = getInfraStats();
@@ -181,7 +207,7 @@ function renderInfrastructures() {
   return `
     <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 class="text-xl font-semibold">Gestion des infrastructures</h1>
+        <h1 class="text-xl font-semibold">Infrastructures & équipements</h1>
         <p class="text-sm text-slate-500">${stats.total} fiche${stats.total > 1 ? 's' : ''} recensée${stats.total > 1 ? 's' : ''}</p>
       </div>
       ${importTriggerButton()}
@@ -195,17 +221,93 @@ function renderInfrastructures() {
     ${infraTableRows(all)}`;
 }
 
-function renderPlanning() {
-  const p = DATA.planning;
+function renderGeography() {
+  const { data: g, updatedKeys } = getGeographyLive();
+  const p = DATA.planning || {};
+  const communes = getCommuneNames();
+  const surveys = getGeographySurveys();
+  return `
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold">Géographie & démographie</h1>
+        <p class="text-sm text-slate-500">Dynamique démographique, foncier, lotissements et enquêtes habitat-ménages.</p>
+      </div>
+      ${importTriggerButton()}
+    </div>
+    ${importModalsShell(communes, GEO_IMPORT_TYPES, {
+      typeLabel: "Type d'information",
+      intro: 'Commune, type d\'enquête ou indicateur, puis fichier CSV ou Excel.',
+    })}
+    <div id="import-result" class="mb-4 hidden rounded-lg border px-4 py-3 text-sm"></div>
+
+    <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      ${card('Population urbaine', (g.urbanPopulation || 0).toLocaleString('fr-FR'))}
+      ${card('Croissance annuelle', (g.populationGrowth || 0) + '%', '', '', updatedKeys.has('populationGrowth') ? 'ring-2 ring-emerald-400/50' : '')}
+      ${card('Conflits fonciers recensés', g.landConflicts || 0, '', '', updatedKeys.has('landConflicts') ? 'ring-2 ring-emerald-400/50' : '')}
+      ${card('Parcelles / lotissements', (g.activeParcels || 0).toLocaleString('fr-FR'))}
+    </div>
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-sm font-medium">Besoins fonciers & habitat</h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          ${card('Besoins habitat (unités)', (g.housingNeeds || 0).toLocaleString('fr-FR'), '', '', updatedKeys.has('housingNeeds') ? 'ring-2 ring-emerald-400/50' : '')}
+          ${card('Densité', (p.populationDensity || 0).toLocaleString('fr-FR') + '/km²')}
+          ${card('Ménages recensés', (g.householdCount || 0).toLocaleString('fr-FR'), '', '', updatedKeys.has('householdCount') ? 'ring-2 ring-emerald-400/50' : '')}
+          ${card('Taille moy. ménage', (g.householdSize || '—') + (g.householdSize ? ' pers.' : ''), '', '', updatedKeys.has('householdSize') ? 'ring-2 ring-emerald-400/50' : '')}
+        </div>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-sm font-medium">Acteurs fonciers identifiés</h2>
+        <ul class="mt-4 space-y-2">${(g.landActors || DATA.geography?.landActors || []).map(a => `
+          <li class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800/50">
+            <span class="h-2 w-2 rounded-full bg-blue-500"></span>${a}
+          </li>`).join('')}</ul>
+      </div>
+    </div>
+
+    <h2 class="mb-3 mt-10 text-sm font-medium text-slate-500">Enquêtes habitat-ménages</h2>
+    <p class="mb-4 text-xs text-slate-500">Données terrain ODK, archives et imports session — liées par commune.</p>
+    ${domainListTable(
+      ['Enquête', 'Commune', 'Ménages', 'Taille moy.', 'Source'],
+      surveys.map(s => [
+        (s.label || 'Enquête') + importedBadge(s),
+        s.commune,
+        (s.households || 0).toLocaleString('fr-FR'),
+        s.avgSize ? s.avgSize + ' pers.' : '—',
+        s.source || '—',
+      ]),
+    )}`;
+}
+
+function renderUrbanism() {
+  const { data: p, updatedKeys } = getUrbanismLive();
+  const communes = getCommuneNames();
+  const growthZones = getGrowthZones();
+  const tripGenerators = getTripGenerators();
   const donut = donutChart([
     { label: 'Résidentiel', value: p.residential, color: '#3b82f6' },
     { label: 'Commercial', value: p.commercial, color: '#10b981' },
     { label: 'Industriel', value: p.industrial, color: '#f59e0b' },
   ]);
-  return `<h1 class="mb-6 text-xl font-semibold">Planification urbaine</h1>
+  return `
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold">Urbanisme & aménagement du territoire</h1>
+        <p class="text-sm text-slate-500">Habitat, zones de croissance, générateurs de déplacements et réserves foncières.</p>
+      </div>
+      ${importTriggerButton()}
+    </div>
+    ${importModalsShell(communes, URBANISM_IMPORT_TYPES, {
+      typeLabel: "Type d'information",
+      intro: 'Commune, type d\'urbanisme (zone, déplacements…), puis fichier CSV ou Excel.',
+    })}
+    <div id="import-result" class="mb-4 hidden rounded-lg border px-4 py-3 text-sm"></div>
+
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      ${card('Zones résidentielles', p.residential + '%')}${card('Zones commerciales', p.commercial + '%')}
-      ${card('Zones industrielles', p.industrial + '%')}${card('Densité population', p.populationDensity.toLocaleString('fr-FR') + '/km²')}
+      ${card('Zones résidentielles', p.residential + '%', '', '', updatedKeys.has('residential') ? 'ring-2 ring-emerald-400/50' : '')}
+      ${card('Zones commerciales', p.commercial + '%', '', '', updatedKeys.has('commercial') ? 'ring-2 ring-emerald-400/50' : '')}
+      ${card('Zones industrielles', p.industrial + '%')}
+      ${card('Réserves foncières', p.availableLand + ' ha', '', '', updatedKeys.has('availableLand') ? 'ring-2 ring-emerald-400/50' : '')}
     </div>
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
       <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
@@ -213,17 +315,42 @@ function renderPlanning() {
         <div class="mt-6">${donut}</div>
       </div>
       <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-        <h2 class="text-sm font-medium">Répartition par type</h2>
+        <h2 class="text-sm font-medium">Évolution par quartier</h2>
         <div class="mt-4 space-y-3">
           ${[['Résidentiel', p.residential, 'bg-blue-500'], ['Commercial', p.commercial, 'bg-emerald-500'], ['Industriel', p.industrial, 'bg-amber-500']].map(([l, v, c]) => `
           <div><div class="mb-1 flex justify-between text-xs"><span>${l}</span><span>${v}%</span></div>
           <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full rounded-full ${c}" style="width:${v}%"></div></div></div>`).join('')}
         </div>
-        <p class="mt-4 text-xs text-slate-500">Terrains disponibles : ${p.availableLand} ha</p>
+        <p class="mt-4 text-xs text-slate-500">Densité : ${p.populationDensity.toLocaleString('fr-FR')} hab./km²</p>
         <div class="mt-4">${barChart(p.neighborhoodEvolution.map(n => ({ month: n.quartier.slice(0, 6), value: n.growth })))}</div>
       </div>
-    </div>`;
+    </div>
+
+    <h2 class="mb-3 mt-10 text-sm font-medium text-slate-500">Zones de croissance</h2>
+    ${domainListTable(
+      ['Zone', 'Commune', 'Surface', 'Potentiel', 'Horizon'],
+      growthZones.map(z => [
+        z.name + importedBadge(z),
+        z.commune,
+        (z.areaHa || 0) + ' ha',
+        z.potential,
+        z.horizon,
+      ]),
+    )}
+
+    <h2 class="mb-3 mt-10 text-sm font-medium text-slate-500">Générateurs de déplacements</h2>
+    ${domainListTable(
+      ['Lieu / activité', 'Commune', 'Dépl./jour', 'Modes dominants'],
+      tripGenerators.map(t => [
+        t.name + importedBadge(t),
+        t.commune,
+        (t.dailyTrips || 0).toLocaleString('fr-FR'),
+        t.mode,
+      ]),
+    )}`;
 }
+
+function renderPlanning() { return renderUrbanism(); }
 
 function renderMap() {
   const zones = getMapZonesLive();
@@ -270,62 +397,11 @@ function renderMap() {
     </div>`;
 }
 
-function renderMobility() {
+function renderEconomyMobility() {
   const m = DATA.mobility;
-  return `<h1 class="mb-6 text-xl font-semibold">Mobilité et transport</h1>
-    <div class="grid gap-4 sm:grid-cols-2">
-      ${trafficLight(m.trafficIndex, 'Indice trafic')}
-      ${trafficLight(m.roadCondition, 'État des routes')}
-      ${trafficLight(100 - m.accessibility, 'Congestion')}
-      ${trafficLight(Math.min(m.avgTravelTime * 2, 100), 'Temps de déplacement')}
-    </div>
-    <div class="mt-6 grid gap-6 lg:grid-cols-2">
-      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-        <h2 class="text-sm font-medium">Carte des embouteillages</h2>
-        <div class="mt-4">${congestionMap(m.congestionHotspots)}</div>
-      </div>
-      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-        <h2 class="text-sm font-medium">Points d'embouteillage</h2>
-        <ul class="mt-4 space-y-2">${m.congestionHotspots.map(h => `
-          <li class="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm dark:bg-red-950/30">
-            <span class="mr-2 h-2 w-2 rounded-full bg-red-500"></span>${h}
-          </li>`).join('')}</ul>
-        <div class="mt-4">${metricRow('Accessibilité', m.accessibility)}</div>
-      </div>
-    </div>`;
-}
-
-function renderEnvironment() {
-  const { data: e, updatedKeys } = getEnvironmentLive();
-  const communes = getCommuneNames();
-  const tone = (v, invert) => {
-    const x = invert ? 100 - v : v;
-    return x >= 65 ? 'good' : x >= 40 ? 'warn' : 'bad';
-  };
-  return `
-    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
-      <h1 class="text-xl font-semibold">Environnement</h1>
-      ${importTriggerButton()}
-    </div>
-    ${importModalsShell(communes, ENV_IMPORT_TYPES, {
-      typeLabel: "Type d'information",
-      intro: "Commune, indicateur environnemental et fichier CSV ou Excel.",
-    })}
-    <div id="import-result" class="mb-4 hidden rounded-lg border px-4 py-3 text-sm"></div>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      ${envIndicatorCard('♻️', 'Gestion des déchets', e.wasteManagement, tone(e.wasteManagement), updatedKeys.has('wasteManagement'))}
-      ${envIndicatorCard('💨', 'Qualité de l\'air', e.airPollution, tone(e.airPollution, true), updatedKeys.has('airPollution'))}
-      ${envIndicatorCard('🔊', 'Pollution sonore', e.noisePollution, tone(e.noisePollution, true), updatedKeys.has('noisePollution'))}
-      ${envIndicatorCard('💧', 'Eaux usées', e.wastewater, tone(e.wastewater), updatedKeys.has('wastewater'))}
-      ${envIndicatorCard('🌊', 'Risque inondation', e.floodRisk, tone(e.floodRisk, true), updatedKeys.has('floodRisk'))}
-      ${envIndicatorCard('🌳', 'Espaces verts', e.greenSpaces, tone(e.greenSpaces), updatedKeys.has('greenSpaces'))}
-    </div>`;
-}
-
-function renderSocioeco() {
   const { data: s, updatedKeys } = getSocioecoLive();
   const communes = getCommuneNames();
-  const items = [
+  const socioItems = [
     ['🏪', 'Commerce', s.commerce, 'commerce'],
     ['🌾', 'Agriculture urbaine', s.urbanAgriculture, 'urbanAgriculture'],
     ['🔨', 'Artisanat', s.crafts, 'crafts'],
@@ -338,41 +414,199 @@ function renderSocioeco() {
   ];
   return `
     <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
-      <h1 class="text-xl font-semibold">Activités socio-économiques</h1>
+      <div>
+        <h1 class="text-xl font-semibold">Économie, mobilité & administration</h1>
+        <p class="mt-1 text-sm text-slate-500">Activités économiques, transports, emploi et profil socio-économique des ménages.</p>
+      </div>
       ${importTriggerButton()}
     </div>
     ${importModalsShell(communes, SOCIO_IMPORT_TYPES, {
       typeLabel: "Type d'information",
-      intro: "Commune, type d'activité socio-économique et fichier CSV ou Excel.",
+      intro: "Commune, indicateur socio-économique et fichier CSV ou Excel.",
     })}
-    <div id="import-result" class="mb-4 hidden rounded-lg border px-4 py-3 text-sm"></div>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${items.map(([icon, l, v, key]) => socioActivityCard(icon, l, v, updatedKeys.has(key))).join('')}</div>`;
+    <div id="import-result" class="mb-6 hidden rounded-lg border px-4 py-3 text-sm"></div>
+
+    <h2 class="mb-3 text-sm font-medium text-slate-500">Mobilité & transports</h2>
+    <div class="mb-8 grid gap-4 sm:grid-cols-2">
+      ${trafficLight(m.trafficIndex, 'Indice trafic')}
+      ${trafficLight(m.roadCondition, 'État des routes')}
+      ${trafficLight(100 - m.accessibility, 'Congestion')}
+      ${trafficLight(Math.min(m.avgTravelTime * 2, 100), 'Temps de déplacement')}
+    </div>
+    <div class="mb-10 grid gap-6 lg:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-sm font-medium">Carte des embouteillages</h2>
+        <div class="mt-4">${congestionMap(m.congestionHotspots)}</div>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-sm font-medium">Points d'embouteillage</h2>
+        <ul class="mt-4 space-y-2">${m.congestionHotspots.map(h => `
+          <li class="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm dark:bg-red-950/30">
+            <span class="h-2 w-2 rounded-full bg-red-500"></span>${h}
+          </li>`).join('')}</ul>
+        <div class="mt-4">${metricRow('Accessibilité', m.accessibility)}</div>
+      </div>
+    </div>
+
+    <h2 class="mb-3 text-sm font-medium text-slate-500">Activités socio-économiques</h2>
+    <div class="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${socioItems.map(([icon, l, v, key]) => socioActivityCard(icon, l, v, updatedKeys.has(key))).join('')}</div>
+
+    <h2 class="mb-3 text-sm font-medium text-slate-500">Finances locales & profil des ménages</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      ${card('Recettes locales', ((s.localFinances || 0) / 1000).toFixed(0) + ' k$', '', '', updatedKeys.has('localFinances') ? 'ring-2 ring-emerald-400/50' : '')}
+      ${card('Budget communal exécuté', (s.municipalBudget || 0) + '%', '', '', updatedKeys.has('municipalBudget') ? 'ring-2 ring-emerald-400/50' : '')}
+      ${card('Ménages (ville)', (s.householdCount || 0).toLocaleString('fr-FR'), '', '', updatedKeys.has('householdCount') ? 'ring-2 ring-emerald-400/50' : '')}
+      ${card('Taille moyenne ménage', (s.householdSize || '—') + (s.householdSize ? ' pers.' : ''), '', '', updatedKeys.has('householdSize') ? 'ring-2 ring-emerald-400/50' : '')}
+    </div>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      ${card('Habitat informel', (s.householdsInformal || 0) + '%', 'Part estimée des ménages en habitat précaire', '', updatedKeys.has('householdsInformal') ? 'ring-2 ring-emerald-400/50' : '')}
+      ${card('Revenu moyen ménage', s.avgIncome + ' $/mois', 'Enquêtes terrain & imports', '', updatedKeys.has('avgIncome') ? 'ring-2 ring-emerald-400/50' : '')}
+    </div>`;
+}
+
+function renderMobility() { return renderEconomyMobility(); }
+function renderSocioeco() { return renderEconomyMobility(); }
+
+function renderEnvironment() {
+  const { data: e, updatedKeys } = getEnvironmentLive();
+  const h = DATA.heritage || {};
+  const communes = getCommuneNames();
+  const tone = (v, invert) => {
+    const x = invert ? 100 - v : v;
+    return x >= 65 ? 'good' : x >= 40 ? 'warn' : 'bad';
+  };
+  return `
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold">Environnement & patrimoines urbains</h1>
+        <p class="mt-1 text-sm text-slate-500">Risques environnementaux, déchets, espaces naturels et patrimoine.</p>
+      </div>
+      ${importTriggerButton()}
+    </div>
+    ${importModalsShell(communes, ENV_IMPORT_TYPES, {
+      typeLabel: "Type d'information",
+      intro: "Commune, indicateur environnemental et fichier CSV ou Excel.",
+    })}
+    <div id="import-result" class="mb-6 hidden rounded-lg border px-4 py-3 text-sm"></div>
+
+    <h2 class="mb-3 text-sm font-medium text-slate-500">Indicateurs environnementaux</h2>
+    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      ${envIndicatorCard('♻️', 'Gestion des déchets', e.wasteManagement, tone(e.wasteManagement), updatedKeys.has('wasteManagement'))}
+      ${envIndicatorCard('💨', 'Qualité de l\'air', e.airPollution, tone(e.airPollution, true), updatedKeys.has('airPollution'))}
+      ${envIndicatorCard('🔊', 'Pollution sonore', e.noisePollution, tone(e.noisePollution, true), updatedKeys.has('noisePollution'))}
+      ${envIndicatorCard('💧', 'Eaux usées', e.wastewater, tone(e.wastewater), updatedKeys.has('wastewater'))}
+      ${envIndicatorCard('🌊', 'Risque inondation', e.floodRisk, tone(e.floodRisk, true), updatedKeys.has('floodRisk'))}
+      ${envIndicatorCard('🌳', 'Espaces verts', e.greenSpaces, tone(e.greenSpaces), updatedKeys.has('greenSpaces'))}
+      ${envIndicatorCard('💧', 'Ressources en eau', e.waterResources, tone(e.waterResources), updatedKeys.has('waterResources'))}
+      ${envIndicatorCard('⚠️', 'Risques environnementaux', e.environmentalRisks, tone(e.environmentalRisks, true), updatedKeys.has('environmentalRisks'))}
+      ${envIndicatorCard('🏖️', 'Potentiel touristique', e.tourism, tone(e.tourism), updatedKeys.has('tourism'))}
+    </div>
+
+    <h2 class="mb-3 text-sm font-medium text-slate-500">Patrimoines, tourisme & paysages</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      ${card('Sites historiques', h.historicSites || 0)}
+      ${card('Espaces naturels', h.naturalSpaces || 0)}
+      ${card('Sites touristiques', h.touristSites || 0)}
+      ${card('Zones paysagères', h.landscapeZones || 0)}
+    </div>`;
+}
+
+function renderSources() {
+  const docs = DATA.sourcesCatalog || [];
+  const typeColors = {
+    Planification: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
+    Enquête: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+    SIG: 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300',
+    Étude: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+    Archive: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  };
+  return `
+    <h1 class="mb-2 text-xl font-semibold">Sources & documents</h1>
+    <p class="mb-6 text-sm text-slate-500">Archives, études antérieures, enquêtes ODK, couches ArcGIS et documents de planification.</p>
+    <div class="mb-6 grid gap-4 sm:grid-cols-3">
+      ${card('Documents référencés', docs.length)}
+      ${card('Domaines couverts', [...new Set(docs.map(d => d.domain))].length)}
+      ${card('Origines', [...new Set(docs.map(d => d.origin))].length)}
+    </div>
+    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+      <table class="w-full min-w-[720px] text-left text-sm">
+        <thead class="border-b border-slate-200 bg-slate-50 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800/50">
+          <tr>
+            <th class="px-4 py-3 font-medium">Document</th>
+            <th class="px-4 py-3 font-medium">Type</th>
+            <th class="px-4 py-3 font-medium">Domaine</th>
+            <th class="px-4 py-3 font-medium">Origine</th>
+            <th class="px-4 py-3 font-medium">Date</th>
+            <th class="px-4 py-3 font-medium">Format</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          ${docs.map(d => `
+            <tr class="bg-white dark:bg-slate-900">
+              <td class="px-4 py-3 font-medium">${d.title}</td>
+              <td class="px-4 py-3"><span class="rounded-full px-2 py-0.5 text-[10px] font-medium ${typeColors[d.type] || typeColors.Archive}">${d.type}</span></td>
+              <td class="px-4 py-3 text-slate-600">${d.domain}</td>
+              <td class="px-4 py-3 text-slate-600">${d.origin}</td>
+              <td class="px-4 py-3 text-slate-500">${d.date}</td>
+              <td class="px-4 py-3 font-mono text-xs">${d.format}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-4 text-xs text-slate-400">Les imports terrain (ODK, Excel, CSV) sont enregistrés par domaine depuis chaque page d'étude.</p>`;
 }
 
 function renderProjects() {
-  const active = DATA.projects.filter(p => p.status !== 'done').length;
+  const projects = getAllProjects();
+  const stats = getProjectsStats();
+  const communes = getCommuneNames();
+  const categories = getInfraCategories();
   const statusOrder = { inprogress: 0, review: 1, todo: 2, done: 3 };
-  const sorted = [...DATA.projects].sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
+  const sorted = [...projects].sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
 
-  return `<h1 class="mb-2 text-xl font-semibold">Gestion des projets</h1>
-    <p class="mb-6 text-sm text-slate-500">${active} projet${active > 1 ? 's' : ''} actif${active > 1 ? 's' : ''} sur ${DATA.projects.length}</p>
-    <div class="space-y-4">
-      ${sorted.map(p => `
-        <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-          <div class="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <div class="flex flex-wrap items-center gap-2">
-                <h3 class="font-medium">${p.title}</h3>
-                ${projectStatusBadge(p.status)}
-              </div>
-              <p class="mt-1 text-xs text-slate-500">${p.priority} · ${p.budget.toLocaleString('fr-FR')} $</p>
-            </div>
-            <span class="text-sm font-semibold">${p.progress}%</span>
+  return `
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold">Gestion des projets</h1>
+        <p class="text-sm text-slate-500">${stats.active} projet${stats.active > 1 ? 's' : ''} actif${stats.active > 1 ? 's' : ''} sur ${stats.total}</p>
+      </div>
+      <button type="button" id="project-add-btn" class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 dark:bg-white dark:text-black">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Nouveau projet
+      </button>
+    </div>
+    <div id="project-result" class="mb-4 hidden rounded-lg border px-4 py-3 text-sm"></div>
+    ${projectFormModal(communes, categories)}
+    <div id="projects-list" class="space-y-4">
+      ${sorted.map(p => projectCard(p)).join('')}
+    </div>`;
+}
+
+function projectCard(p) {
+  const barColor = p.status === 'done' ? 'bg-emerald-500' : p.status === 'inprogress' ? 'bg-blue-500' : 'bg-black dark:bg-white';
+  const meta = [p.priority, p.budget ? p.budget.toLocaleString('fr-FR') + ' $' : null, p.commune, p.category].filter(Boolean).join(' · ');
+  return `
+    <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900" data-project-id="${p.id}">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-medium">${p.title}</h3>
+            ${projectStatusBadge(p.status)}
+            ${p.created ? '<span class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-medium text-violet-800 dark:bg-violet-950 dark:text-violet-300">nouveau</span>' : ''}
           </div>
-          <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-            <div class="h-full rounded-full ${p.status === 'done' ? 'bg-emerald-500' : p.status === 'inprogress' ? 'bg-blue-500' : 'bg-black dark:bg-white'}" style="width:${p.progress}%"></div>
-          </div>
-        </div>`).join('')}
+          ${meta ? `<p class="mt-1 text-xs text-slate-500">${meta}</p>` : ''}
+          ${p.description ? `<p class="mt-2 text-sm text-slate-600 dark:text-slate-300">${p.description}</p>` : ''}
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-semibold">${p.progress}%</span>
+          <button type="button" class="project-edit-btn rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800" data-project-id="${p.id}">
+            Modifier
+          </button>
+        </div>
+      </div>
+      <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+        <div class="h-full rounded-full ${barColor}" style="width:${p.progress}%"></div>
+      </div>
     </div>`;
 }
 

@@ -30,30 +30,44 @@ const scripts = `
   <script src="../js/layout.js"></script>
   <script src="../js/renders.js"></script>
   <script src="../js/interactions.js"></script>
+  <script src="../js/projects.js"></script>
 `;
 
 const xlsxScript = `  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>\n`;
 
 const pages = [
   ['dashboard.html', 'Tableau de bord', 'renderDashboard', null],
-  ['infrastructures.html', 'Gestion des infrastructures', 'renderInfrastructures', "bindImportHandlers(() => location.reload(), 'infra')"],
-  ['planification.html', 'Planification urbaine', 'renderPlanning', null],
-  ['cartographie.html', 'Cartographie et SIG', 'renderMap', null],
-  ['mobilite.html', 'Mobilité et transport', 'renderMobility', null],
-  ['environnement.html', 'Environnement', 'renderEnvironment', "bindImportHandlers(() => location.reload(), 'env')"],
-  ['socio-economique.html', 'Activités socio-économiques', 'renderSocioeco', "bindImportHandlers(() => location.reload(), 'socio')"],
-  ['projets.html', 'Gestion des projets', 'renderProjects', null],
+  ['geographie-demographie.html', 'Géographie & démographie', 'renderGeography', "bindImportHandlers(() => location.reload(), 'geo')"],
+  ['urbanisme.html', 'Urbanisme & aménagement', 'renderUrbanism', "bindImportHandlers(() => location.reload(), 'urbanism')"],
+  ['infrastructures.html', 'Infrastructures & équipements', 'renderInfrastructures', "bindImportHandlers(() => location.reload(), 'infra')"],
+  ['economie-mobilite.html', 'Économie, mobilité & administration', 'renderEconomyMobility', "bindImportHandlers(() => location.reload(), 'socio')"],
+  ['environnement.html', 'Environnement & patrimoines', 'renderEnvironment', "bindImportHandlers(() => location.reload(), 'env')"],
+  ['sources.html', 'Sources & documents', 'renderSources', null],
+  ['cartographie.html', 'Cartographie SIG', 'renderMap', null],
+  ['projets.html', 'Gestion des projets', 'renderProjects', 'bindProjectHandlers()'],
   ['rapports.html', 'Rapports et statistiques', 'renderReports', null],
   ['notifications.html', 'Notifications', 'renderNotifications', null],
   ['utilisateurs.html', 'Utilisateurs et rôles', 'renderUsers', null],
   ['parametres.html', 'Paramètres', 'renderSettings', 'bindImportHandlers(() => { window.location.href = \"infrastructures.html\"; })'],
 ];
 
+const redirects = [
+  ['planification.html', 'urbanisme.html'],
+  ['mobilite.html', 'economie-mobilite.html'],
+  ['socio-economique.html', 'economie-mobilite.html'],
+];
+
 pages.forEach(([file, title, render, after]) => {
   const afterPart = after ? `, () => { ${after} }` : '';
   const init = `<script>initPage('${file}', '${title}', ${render}${afterPart});</script>`;
-  const needsXlsx = ['infrastructures.html', 'parametres.html', 'environnement.html', 'socio-economique.html'].includes(file);
+  const needsXlsx = ['infrastructures.html', 'parametres.html', 'environnement.html', 'economie-mobilite.html', 'geographie-demographie.html', 'urbanisme.html'].includes(file);
   const html = head + (needsXlsx ? xlsxScript : '') + scripts + init + '\n</body>\n</html>\n';
   fs.writeFileSync(path.join(dir, file), html);
   console.log('Created', file);
+});
+
+redirects.forEach(([from, to]) => {
+  const html = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${to}"><script>location.replace('${to}')</script></head><body></body></html>\n`;
+  fs.writeFileSync(path.join(dir, from), html);
+  console.log('Redirect', from, '->', to);
 });
